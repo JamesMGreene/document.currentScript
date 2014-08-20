@@ -26,15 +26,17 @@
       return result;
     })();
 
-  var hasStack = (function() {
-    var result = false;
+  var hasStackBeforeThrowing = false,
+      hasStackAfterThrowing = false;
+  (function() {
     try {
-      throw new Error();
+      var err = new Error();
+      hasStackBeforeThrowing = typeof err.stack === "string" && !!err.stack;
+      throw err;
     }
-    catch (err) {
-      result = typeof err.stack === "string" && !!err.stack;
+    catch (thrownErr) {
+      hasStackAfterThrowing = typeof thrownErr.stack === "string" && !!thrownErr.stack;
     }
-    return result;
   })();
 
 
@@ -125,23 +127,31 @@
       return scripts[scripts.length - 1];
     }
 
-    if (hasStack) {
+    var stack,
+        e = new Error();
+    if (hasStackBeforeThrowing) {
+      stack = e.stack;
+    }
+    if (!stack && hasStackAfterThrowing) {
       try {
-        throw new Error();
+        throw e;
       }
       catch (err) {
         // NOTE: Cannot use `err.sourceURL` or `err.fileName` as they will always be THIS script
-        var url = getScriptUrlFromStack(err.stack);
-        var script = getScriptFromUrl(url);
-        if (!script && url === pageUrl) {
-          script = getSoleInlineScript();
-        }
-        return script;
+        stack = err.stack;
       }
     }
-
+    if (stack) {
+      var url = getScriptUrlFromStack(stack);
+      var script = getScriptFromUrl(url);
+      if (!script && url === pageUrl) {
+        script = getSoleInlineScript();
+      }
+      return script;
+    }
     //return undefined;
   }
+
 
   // Configuration
   _currentScript.skipStackDepth = 1;
