@@ -10,7 +10,7 @@
   "freeze": true,
   "immed": true,
   "indent": 2,
-  "latedef": true,
+  "latedef": false,   /* IDEAL: true */
   "newcap": true,
   "noarg": true,
   "noempty": true,
@@ -20,7 +20,7 @@
   "quotmark": "double",
   "undef": true,
   "unused": true,
-  "strict": true,
+  "strict": false,
   "trailing": true,
   "maxparams": 4,
   "maxdepth": 5,

@@ -1,3 +1,14 @@
+/*!
+ * document.currentScript
+ * Polyfill for `document.currentScript`.
+ * Copyright (c) 2014 James M. Greene
+ * Licensed MIT
+ * http://jsfiddle.net/JamesMGreene/9DFc9/
+ * v0.1.3
+ */
+(function() {
+
+
 var hasStackBeforeThrowing = false,
     hasStackAfterThrowing = false;
 (function() {
@@ -44,19 +55,32 @@ function getSoleInlineScript() {
   return script;
 }
 
+// Get the configured default value for how many layers of stack depth to ignore
+function getStackDepthToSkip() {
+  var depth = 0;
+  if (
+    typeof _currentScript !== "undefined" &&
+    _currentScript &&
+    typeof _currentScript.skipStackDepth === "number"
+  ) {
+    depth = _currentScript.skipStackDepth;
+  }
+  return depth;
+}
+
 // Get the currently executing script URL from an Error stack trace
 function getScriptUrlFromStack(stack, skipStackDepth) {
   var url, matches, remainingStack,
       ignoreMessage = typeof skipStackDepth === "number";
-  skipStackDepth = ignoreMessage ? skipStackDepth : (typeof _currentScript.skipStackDepth === "number" ? _currentScript.skipStackDepth : 0);
+  skipStackDepth = ignoreMessage ? skipStackDepth : getStackDepthToSkip();
   if (typeof stack === "string" && stack) {
     if (ignoreMessage) {
-      matches = stack.match(/((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+      matches = stack.match(/((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
     }
     else {
-      matches = stack.match(/^(?:|[^:@]*@|.+\)@(?=blob:|http[s]?|file)|.+?\s+(?: at |@)(?:[^:\(]+ )*[\(]?)((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+      matches = stack.match(/^(?:|[^:@]*@|.+\)@(?=http[s]?|file)|.+?\s+(?: at |@)(?:[^:\(]+ )*[\(]?)((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
       if (!(matches && matches[1])) {
-        matches = stack.match(/\)@((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+        matches = stack.match(/\)@((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
         if (matches && matches[1]) {
           url = matches[1];
         }
@@ -127,3 +151,47 @@ function _currentScript() {
 
 // Configuration
 _currentScript.skipStackDepth = 1;
+
+
+
+// Inspect the polyfill-ability of this browser
+var needsPolyfill = !("currentScript" in document);
+var canDefineGetter = document.__defineGetter__;
+var canDefineProp = typeof Object.defineProperty === "function" &&
+  (function() {
+    var result;
+    try {
+      Object.defineProperty(document, "_xyz", {
+        value: "blah",
+        enumerable: true,
+        writable: false,
+        configurable: false
+      });
+      result = document._xyz === "blah";
+      delete document._xyz;
+    }
+    catch (e) {
+      result = false;
+    }
+    return result;
+  })();
+
+
+// Add the "private" property for testing, even if the real property can be polyfilled
+document._currentScript = _currentScript;
+
+// Polyfill it!
+if (needsPolyfill) {
+  if (canDefineProp) {
+    Object.defineProperty(document, "currentScript", {
+      get: _currentScript,
+      enumerable: true,
+      configurable: false
+    });
+  }
+  else if (canDefineGetter) {
+    document.__defineGetter__("currentScript", _currentScript);
+  }
+}
+
+})();

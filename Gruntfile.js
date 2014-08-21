@@ -39,18 +39,17 @@ module.exports = function(grunt) {
         stripBanners: true
       },
       dist: {
-        src: ["src/start.js", "src/<%= pkg.title %>.js", "src/end.js"],
+        src: ["src/start.js", "src/main.js", "src/end.js"],
         dest: "dist/<%= pkg.title %>.js"
       }
     },
     uglify: {
       options: {
         report: "min",
-        banner: "<%= banner %>",
-        stripBanners: true
+        preserveComments: "some"
       },
       dist: {
-        src: "<%= concat.dist.dest %>",
+        src: ["<%= concat.dist.dest %>"],
         dest: "dist/<%= pkg.title %>.min.js"
       }
     },

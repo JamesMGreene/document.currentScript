@@ -1,441 +1,184 @@
-/*global ZeroClipboard, _globalConfig:true, _flashState, _clipData, _clipDataFormatMap, _deleteOwnProperties */
+/*global QUnit, getScriptUrlFromStack, _currentScript */
 
 (function(module, test) {
   "use strict";
 
-  // Helper functions
-  var TestUtils = {
-    getHtmlBridge: function() {
-      return document.getElementById("global-zeroclipboard-html-bridge");
-    }
-  };
+  var hasNativeSupport = "currentScript" in document;
 
-  var originalConfig, originalFlashDetect;
+  var inlineStackTemplates = [
+        {
+          browser:     "Chrome (Windows)",
+          stackPrefix: "Error: my uncaught error\n    at ",
+          stackSuffix: ":139:7\n    at jQuery.event.dispatch (http://code.jquery.com/blah.js:123:0)\n    at foo"
+        },
+        {
+          browser:     "Firefox 3.6 (Windows)",
+          stackPrefix: "Error(\"my error\")@:0\u000a([object Object])@",
+          stackSuffix: ":129\u000a([object Object])@http://code.jquery.com/blah.js:123\u000afoo"
+        },
+        {
+          browser:     "IE 10.0 (Windows)",
+          stackPrefix: "Error: my uncaught error\n    at ",
+          stackSuffix: ":139:7\n    at jQuery.event.dispatch (http://code.jquery.com/blah.js:123:0)\n    at foo"
+        },
+        {
+          browser:     "IE 10.0 (Windows) with custom error message",
+          stackPrefix: "Error: my sneaky error message has a URL in it at http://google.com/mean.js:123\n    at Anonymous function (",
+          stackSuffix: ":133:5)\n    at dispatch (http://code.jquery.com/blah.js:123:0)\n    at foo"
+        },
+        {
+          browser:     "Opera (Windows)",
+          stackPrefix: "<anonymous function>([arguments not available])@",
+          stackSuffix: ":139\n<anonymous function: dispatch>([arguments not available])@http://code.jquery.com/blah.js:123\nfoo"
+        },
+        {
+          browser:     "PhantomJS (Windows)",
+          stackPrefix: "Error: my error\n    at ",
+          stackSuffix: ":139\n    at http://code.jquery.com/blah.js:123\nfoo"
+        },
+        {
+          browser:     "Safari 6.0 (Mac)",
+          stackPrefix: "@",
+          stackSuffix: ":139\ndispatch@http://code.jquery.com/blah.js:123\nfoo"
+        },
+        {
+          browser:     "Safari 6.1 (Mac)",
+          stackPrefix: "",
+          stackSuffix: ":139:7\ndispatch@http://code.jquery.com/blah.js:123:12\nfoo"
+        },
+        {
+          browser:     "Safari 7.0 (iOS)",
+          stackPrefix: "",
+          stackSuffix: ":139:7\ndispatch@http://code.jquery.com/blah.js:123:12\nfoo"
+        }        
+      ];
+
+  var externalStackTemplates =       [
+        {
+          browser:     "Chrome (Windows)",
+          stackPrefix: "Error: my error\n    at window.onload (",
+          stackSuffix: ":95:11)\n    at jQuery.event.dispatch (http://code.jquery.com/blah.js:123:0)\n    at foo"
+        },
+        {
+          browser:     "Firefox 3.6 (Windows)",
+          stackPrefix: "Error(\"my error\")@:0\u000a@",
+          stackSuffix: ":95\u000a([object Object])@http://code.jquery.com/blah.js:123\u000afoo"
+        },
+        {
+          browser:     "IE 10.0 (Windows)",
+          stackPrefix: "Error: my error\n    at onload (",
+          stackSuffix: ":95:11)\n    at dispatch (http://code.jquery.com/blah.js:123:0)\n    at foo"
+        },
+        {
+          browser:     "IE 10.0 (Windows) with custom error message",
+          stackPrefix: "Error: my sneaky error message has a URL in it at http://google.com/mean.js:123\n    at onload (",
+          stackSuffix: ":95:11)\n    at dispatch (http://code.jquery.com/blah.js:123:0)\n    at foo"
+        },
+        {
+          browser:     "Opera (Windows)",
+          stackPrefix: "<anonymous function: window.onload>([arguments not available])@",
+          stackSuffix: ":95\n<anonymous function: dispatch>([arguments not available])@http://code.jquery.com/blah.js:123\nfoo"
+        },
+        {
+          browser:     "PhantomJS (Windows)",
+          stackPrefix: "Error: my error\n    at ",
+          stackSuffix: ":95\n    at http://code.jquery.com/blah.js:123\nfoo"
+        },
+        {
+          browser:     "Safari 6.0 (Mac)",
+          stackPrefix: "onload@",
+          stackSuffix: ":95\ndispatch@http://code.jquery.com/blah.js:123\nfoo"
+        },
+        {
+          browser:     "Safari 6.1 (Mac)",
+          stackPrefix: "onload@",
+          stackSuffix: ":95:11\ndispatch@http://code.jquery.com/blah.js:123:12\nfoo"
+        },
+        {
+          browser:     "Safari 7.0 (iOS)",
+          stackPrefix: "onload@",
+          stackSuffix: ":95:11\ndispatch@http://code.jquery.com/blah.js:123:12\nfoo"
+        }
+      ];
 
 
-  module("core/api.js unit tests - state");
-
-
-  test("`state` produces expected result", function(assert) {
-    assert.expect(8);
-
-    // Act
-    var result = ZeroClipboard.state();
-
-    // Assert
-    assert.deepEqual(Object.keys(result), ["browser", "flash", "zeroclipboard"], "Has all expected keys");
-    assert.strictEqual(typeof result.browser, "object", ".browser is an object");
-    assert.notStrictEqual(result.browser, null, ".browser is a non-null object");
-    assert.strictEqual(typeof result.flash, "object", ".flash is an object");
-    assert.notStrictEqual(result.flash, null, ".flash is a non-null object");
-    assert.strictEqual(typeof result.zeroclipboard, "object", ".zeroclipboard is an object");
-    assert.notStrictEqual(result.zeroclipboard, null, ".zeroclipboard is a non-null object");
-    assert.deepEqual(Object.keys(result.zeroclipboard), ["version", "config"], ".zeroclipboard has all expected keys");
-  });
-
-
-  module("core/api.js unit tests - config", {
+  var _originalStackDepth;
+  module("Stack parsing", {
     setup: function() {
-      originalConfig = ZeroClipboard.config();
+      _originalStackDepth = _currentScript.skipStackDepth;
+      // Default is `1` but we are testing with the non-wrapped version so we need to reduce this to `0`
+      _currentScript.skipStackDepth = 0;
     },
     teardown: function() {
-      _globalConfig = originalConfig;
+      _currentScript.skipStackDepth = _originalStackDepth;
     }
   });
 
 
-  test("`swfPath` finds the expected default URL", function(assert) {
-    assert.expect(1);
-
-    // Assert, act, assert
-    var rootOrigin = window.location.protocol + "//" + window.location.host + "/";
-    var indexOfTest = window.location.pathname.toLowerCase().indexOf("/test/");
-    var rootDir = window.location.pathname.slice(1, indexOfTest + 1);
-    var rootPath = rootOrigin + rootDir;
-    //var stateJsUrl = rootPath + "src/js/core/state.js";
-    // This is, for the record, a totally incorrect path due to being the development
-    // file structure but it IS the correct URL based on calculated assumption of using
-    // the built distributable versions of the library
-    var swfPathBasedOnStateJsPath = rootPath + "src/js/core/ZeroClipboard.swf";
-
-    // Test that the client has the expected default URL [even if it's not correct]
-    assert.strictEqual(ZeroClipboard.config("swfPath"), swfPathBasedOnStateJsPath);
-  });
-
-
-  test("Changing `trustedDomains` works", function(assert) {
-    assert.expect(5);
-
-    // Arrange
-    var currentHost = window.location.host;
-    var originalValue = currentHost ? [currentHost] : [];
-    var updatedValue = currentHost ? [currentHost, "otherDomain.com"] : ["otherDomain.com"];
-
-    // Assert, act, assert
-    // Test that the client has the default value
-    assert.deepEqual(ZeroClipboard.config("trustedDomains"), originalValue);
-    assert.deepEqual(ZeroClipboard.config().trustedDomains, originalValue);
-    // Change the value
-    var updatedConfig = ZeroClipboard.config({ trustedDomains: updatedValue });
-    // Test that the client has the changed value
-    assert.deepEqual(updatedConfig.trustedDomains, updatedValue);
-    assert.deepEqual(ZeroClipboard.config("trustedDomains"), updatedValue);
-    assert.deepEqual(ZeroClipboard.config().trustedDomains, updatedValue);
-  });
-
-
-  test("Some config values are ignored if SWF is actively embedded", function(assert) {
-    assert.expect(2);
-
-    // Arrange
-    var _swfPath = ZeroClipboard.config("swfPath");
-    var expectedBefore = {
-      swfPath: _swfPath,
-      trustedDomains: window.location.host ? [window.location.host] : [],
-      cacheBust: true,
-      forceEnhancedClipboard: false,
-      flashLoadTimeout: 30000,
-      autoActivate: true,
-      containerId: "global-zeroclipboard-html-bridge",
-      containerClass: "global-zeroclipboard-container",
-      swfObjectId: "global-zeroclipboard-flash-bridge",
-      hoverClass: "zeroclipboard-is-hover",
-      activeClass: "zeroclipboard-is-active",
-
-      // These configuration values CAN be modified while a SWF is actively embedded.
-      bubbleEvents: true,
-      forceHandCursor: false,
-      title: null,
-      zIndex: 999999999
-    };
-    var expectedAfter = {
-      swfPath: _swfPath,
-      trustedDomains: window.location.host ? [window.location.host] : [],
-      cacheBust: true,
-      forceEnhancedClipboard: false,
-      flashLoadTimeout: 30000,
-      autoActivate: true,
-      containerId: "global-zeroclipboard-html-bridge",
-      containerClass: "global-zeroclipboard-container",
-      swfObjectId: "global-zeroclipboard-flash-bridge",
-      hoverClass: "zeroclipboard-is-hover",
-      activeClass: "zeroclipboard-is-active",
-
-      // These configuration values CAN be modified while a SWF is actively embedded.
-      bubbleEvents: false,
-      forceHandCursor: true,
-      title: "test",
-      zIndex: 1000
-    };
-
-    // Act
-    var actualBefore = ZeroClipboard.config();
-
-    _flashState.bridge = {};
-
-    var actualAfter = ZeroClipboard.config({
-      swfPath: "/path/to/test.swf",
-      trustedDomains: ["test.domain.com"],
-      cacheBust: false,
-      forceEnhancedClipboard: true,
-      flashLoadTimeout: 15000,
-      autoActivate: false,
-      containerId: "test-id",
-      containerClass: "test-class",
-      swfObjectId: "test-swf",
-      hoverClass: "test-hover",
-      activeClass: "test-active",
-
-      // These configuration values CAN be modified while a SWF is actively embedded.
-      bubbleEvents: false,
-      forceHandCursor: true,
-      title: "test",
-      zIndex: 1000
-    });
-
-    // Assert
-    assert.deepEqual(actualBefore, expectedBefore, "Original config is as expected");
-    assert.deepEqual(actualAfter, expectedAfter, "Updated config is as expected");
-  });
-
-
-  module("core/api.js unit tests - clipboard", {
-    teardown: function() {
-      _deleteOwnProperties(_clipData);
-    }
-  });
-
-
-  test("`setData` works", function(assert) {
-    assert.expect(4);
-
-    // Assert, Act, repeat ad nauseam
-    assert.deepEqual(_clipData, {}, "`_clipData` is empty");
-
-    ZeroClipboard.setData("text/plain", "zc4evar");
-    assert.deepEqual(_clipData, { "text/plain": "zc4evar" }, "`_clipData` contains expected text");
-
-    ZeroClipboard.setData("text/x-markdown", "**ZeroClipboard**");
-    assert.deepEqual(_clipData, { "text/plain": "zc4evar", "text/x-markdown": "**ZeroClipboard**" }, "`_clipData` contains expected text and custom format");
-
-    ZeroClipboard.setData({ "text/html": "<b>Win</b>" });
-    assert.deepEqual(_clipData, { "text/html": "<b>Win</b>" }, "`_clipData` contains expected HTML and cleared out old data because an object was passed in");
-  });
-
-
-  test("`clearData` works", function(assert) {
-    assert.expect(4);
-
-    // Assert
-    assert.deepEqual(_clipData, {}, "`_clipData` is empty");
-
-    // Arrange & Assert
-    _clipData["text/plain"] = "zc4evar";
-    _clipData["text/html"] = "<b>Win</b>";
-    _clipData["text/x-markdown"] = "**ZeroClipboard**";
-    assert.deepEqual(_clipData, {
-      "text/plain": "zc4evar",
-      "text/html": "<b>Win</b>",
-      "text/x-markdown": "**ZeroClipboard**"
-    }, "`_clipData` contains all expected data");
+  test("`getScriptUrlFromStack` handles bad input", function(assert) {
+    assert.expect(12);
 
     // Act & Assert
-    ZeroClipboard.clearData("text/html");
-    assert.deepEqual(_clipData, {
-      "text/plain": "zc4evar",
-      "text/x-markdown": "**ZeroClipboard**"
-    }, "`_clipData` had 'text/html' successfully removed");
-
-    // Act & Assert
-    ZeroClipboard.clearData();
-    assert.deepEqual(_clipData, {}, "`_clipData` had all data successfully removed");
+    assert.strictEqual(undefined, getScriptUrlFromStack(), "Should work when stack is not provided");
+    assert.strictEqual(undefined, getScriptUrlFromStack(undefined), "Should work when stack is `undefined`");
+    assert.strictEqual(undefined, getScriptUrlFromStack(null), "Should work when stack is `null`");
+    assert.strictEqual(undefined, getScriptUrlFromStack(false), "Should work when stack is `false`");
+    assert.strictEqual(undefined, getScriptUrlFromStack(true), "Should work when stack is `true`");
+    assert.strictEqual(undefined, getScriptUrlFromStack(NaN), "Should work when stack is `NaN`");
+    assert.strictEqual(undefined, getScriptUrlFromStack(0), "Should work when stack is `0`");
+    assert.strictEqual(undefined, getScriptUrlFromStack(2), "Should work when stack is some non-falsy number");
+    assert.strictEqual(undefined, getScriptUrlFromStack({}), "Should work when stack is an object");
+    assert.strictEqual(undefined, getScriptUrlFromStack([]), "Should work when stack is an array");
+    assert.strictEqual(undefined, getScriptUrlFromStack(function() {}), "Should work when stack is a function");
+    assert.strictEqual(undefined, getScriptUrlFromStack(""), "Should work when stack is an empty string");
   });
 
 
-  module("core/api.js unit tests - flash", {
-    setup: function() {
-      // Store
-      originalFlashDetect = ZeroClipboard.isFlashUnusable;
-      // Modify
-      ZeroClipboard.isFlashUnusable = function() {
-        return false;
-      };
-    },
-    teardown: function() {
-      // Restore
-      ZeroClipboard.isFlashUnusable = originalFlashDetect;
-      ZeroClipboard.destroy();
+  test("`getScriptUrlFromStack` parses inline script stacks correctly", function(assert) {
+    assert.expect(inlineStackTemplates.length + 1);
+
+    // Arrange
+    var expected = "http://jsfiddle.net/JamesMGreene/t5dzL/show/";
+    var stack;
+
+    // Act & Assert
+    assert.ok(inlineStackTemplates.length > 0, "Should have a list of inline stack templates");
+    for (var i = 0, len = inlineStackTemplates.length; i < len; i++) {
+      stack = inlineStackTemplates[i].stackPrefix + expected + inlineStackTemplates[i].stackSuffix;
+      assert.strictEqual(getScriptUrlFromStack(stack), expected, "Should work for inline stack from " + inlineStackTemplates[i].browser);
     }
   });
 
 
-  test("Flash object is ready after emitting `ready`", function(assert) {
-    assert.expect(2);
+  test("`getScriptUrlFromStack` parses external script stacks correctly", function(assert) {
+    assert.expect(externalStackTemplates.length + 1);
 
     // Arrange
-    ZeroClipboard.isFlashUnusable = function() {
-      return false;
-    };
-    ZeroClipboard.create();
+    var expected = "https://rawgit.com/JamesMGreene/b6b3d263f0806c5a9ab4/raw/0c4471eb6bee8ceef976ed72f36218eca0dc4b19/jsfiddle_7WE33.js";
+    var stack;
 
-    // Assert, act, assert
-    assert.strictEqual(_flashState.ready, false);
-    // `emit`-ing event handlers are async (generally) but the internal `ready` state is set synchronously
-    ZeroClipboard.emit("ready");
-    assert.strictEqual(_flashState.ready, true);
+    // Act & Assert
+    assert.ok(externalStackTemplates.length > 0, "Should have a list of external stack templates");
+    for (var i = 0, len = externalStackTemplates.length; i < len; i++) {
+      stack = externalStackTemplates[i].stackPrefix + expected + externalStackTemplates[i].stackSuffix;
+      assert.strictEqual(getScriptUrlFromStack(stack), expected, "Should work for external stack from " + externalStackTemplates[i].browser);
+    }
   });
 
 
-  test("Object has a title", function(assert) {
+
+  module("Match results from browsers with native support");
+
+  test("`_currentScript()` result matches native `document.currentScript`", function(assert) {
     assert.expect(1);
 
-    // Arrange
-    var currentEl = document.getElementById("d_clip_button");
-    ZeroClipboard.create();
-
-    // Act
-    ZeroClipboard.activate(currentEl);
-
-    // Assert
-    assert.strictEqual(TestUtils.getHtmlBridge().getAttribute("title"), "Click me to copy to clipboard.");
-
-    // Revert
-    ZeroClipboard.deactivate();
+    if (hasNativeSupport) {
+      assert.strictEqual(document.currentScript, _currentScript(), "`_currentScript()` === native `document.currentScript`");
+    }
+    else {
+      assert.ok(true, "This browser does not have native support for `document.currentScript`");
+    }
   });
 
-
-  test("Object has no title", function(assert) {
-    assert.expect(1);
-
-    // Arrange
-    var currentEl = document.getElementById("d_clip_button_no_title");
-    ZeroClipboard.create();
-
-    // Act
-    ZeroClipboard.activate(currentEl);
-
-    // Assert
-    assert.ok(!TestUtils.getHtmlBridge().getAttribute("title"));
-
-    // Revert
-    ZeroClipboard.deactivate();
-  });
-
-
-  test("Object has data-clipboard-text", function(assert) {
-    assert.expect(3);
-
-    // Arrange
-    var currentEl = document.getElementById("d_clip_button");
-    ZeroClipboard.create();
-
-    // Act
-    ZeroClipboard.activate(currentEl);
-    var pendingText = ZeroClipboard.emit("copy");
-
-    // Assert
-    assert.deepEqual(_clipData, { "text/plain": "Copy me!" });
-    assert.deepEqual(pendingText, { "text": "Copy me!" });
-    assert.deepEqual(_clipDataFormatMap, { "text": "text/plain" });
-
-    // Revert
-    ZeroClipboard.deactivate();
-  });
-
-
-  test("Object has data-clipboard-target textarea", function(assert) {
-    assert.expect(3);
-
-    // Arrange
-    var currentEl = document.getElementById("d_clip_button_textarea_text");
-    var expectedText =
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\n"+
-      "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,\n"+
-      "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo\n"+
-      "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\n"+
-      "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\n"+
-      "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-
-    ZeroClipboard.create();
-
-    // Act
-    ZeroClipboard.activate(currentEl);
-    var pendingText = ZeroClipboard.emit("copy");
-
-    // Assert
-    assert.strictEqual(_clipData["text/plain"].replace(/\r\n/g, "\n"), expectedText);
-    assert.strictEqual(pendingText.text.replace(/\r\n/g, "\n"), expectedText);
-    assert.deepEqual(_clipDataFormatMap, { "text": "text/plain" });
-
-    // Revert
-    ZeroClipboard.deactivate();
-  });
-
-
-  test("Object has data-clipboard-target pre", function(assert) {
-    assert.expect(5);
-
-    // Arrange
-    var currentEl = document.getElementById("d_clip_button_pre_text");
-    var expectedText =
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\n"+
-      "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,\n"+
-      "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo\n"+
-      "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\n"+
-      "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\n"+
-      "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-    var expectedHtml =
-      "<pre id=\"clipboard_pre\">"+
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod\n"+
-      "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,\n"+
-      "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo\n"+
-      "consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse\n"+
-      "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non\n"+
-      "proident, sunt in culpa qui officia deserunt mollit anim id est laborum."+
-      "</pre>";
-
-    ZeroClipboard.create();
-
-    // Act
-    ZeroClipboard.activate(currentEl);
-    var pendingText =  ZeroClipboard.emit("copy");
-
-    // Assert
-    assert.strictEqual(_clipData["text/plain"].replace(/\r\n/g, "\n"), expectedText);
-    assert.strictEqual(
-      _clipData["text/html"]
-        .replace(/\r\n/g, "\n")
-        .replace(/<\/?pre(?:\s+[^>]*)?>/gi, function($0) { return $0.toLowerCase(); }),
-      expectedHtml
-    );
-    assert.strictEqual(pendingText.text.replace(/\r\n/g, "\n"), expectedText);
-    assert.strictEqual(
-      pendingText.html
-        .replace(/\r\n/g, "\n")
-        .replace(/<\/?pre(?:\s+[^>]*)?>/gi, function($0) { return $0.toLowerCase(); }),
-      expectedHtml
-    );
-    assert.deepEqual(_clipDataFormatMap, { "text": "text/plain", "html": "text/html" });
-
-    // Revert
-    ZeroClipboard.deactivate();
-  });
-
-
-  test("Object has data-clipboard-target input", function(assert) {
-    assert.expect(3);
-
-    // Arrange
-    var currentEl = document.getElementById("d_clip_button_input_text");
-    ZeroClipboard.create();
-
-    // Act
-    ZeroClipboard.activate(currentEl);
-    var pendingText = ZeroClipboard.emit("copy");
-
-    // Assert
-    assert.deepEqual(_clipData, { "text/plain": "Clipboard Text" });
-    assert.deepEqual(pendingText, { "text": "Clipboard Text" });
-    assert.deepEqual(_clipDataFormatMap, { "text": "text/plain" });
-
-    // Revert
-    ZeroClipboard.deactivate();
-  });
-
-
-  test("Object doesn't have data-clipboard-text", function(assert) {
-    assert.expect(1);
-
-    // Arrange
-    var currentEl = document.getElementById("d_clip_button_no_text");
-    ZeroClipboard.create();
-
-    // Act
-    ZeroClipboard.activate(currentEl);
-
-    // Assert
-    assert.ok(!TestUtils.getHtmlBridge().getAttribute("data-clipboard-text"));
-
-    // Revert
-    ZeroClipboard.deactivate();
-  });
-
-
-  test("Calculations based on borderWidth never return NaN", function(assert) {
-    assert.expect(4);
-
-    // Arrange
-    var currentEl = document.getElementById("d_clip_button");
-    ZeroClipboard.create();
-
-    // Act
-    ZeroClipboard.activate(currentEl);
-
-    // Assert
-    assert.strictEqual(/^-?[0-9\.]+px$/.test(TestUtils.getHtmlBridge().style.top), true);
-    assert.strictEqual(/^-?[0-9\.]+px$/.test(TestUtils.getHtmlBridge().style.left), true);
-    assert.strictEqual(/^-?[0-9\.]+px$/.test(TestUtils.getHtmlBridge().style.width), true);
-    assert.strictEqual(/^-?[0-9\.]+px$/.test(TestUtils.getHtmlBridge().style.height), true);
-  });
 
 })(QUnit.module, QUnit.test);
