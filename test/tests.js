@@ -166,6 +166,21 @@
   });
 
 
+  test("`getScriptUrlFromStack` parses Blob URI script stacks correctly", function(assert) {
+    assert.expect(externalStackTemplates.length + 1);
+
+    // Arrange
+    var expected = "blob:https://rawgit.com/0c4471eb6bee8ceef976ed72f36218eca0dc4b19.js";
+    var stack;
+
+    assert.ok(externalStackTemplates.length > 0, "Should have a list of Blob URI stack templates");
+    for (var i = 0, len = externalStackTemplates.length; i < len; i++) {
+      stack = externalStackTemplates[i].stackPrefix + expected + externalStackTemplates[i].stackSuffix;
+      assert.strictEqual(getScriptUrlFromStack(stack), expected, "Should work for Blob URI stack from " + externalStackTemplates[i].browser);
+    }
+  });
+
+
 
   module("Match results from browsers with native support");
 

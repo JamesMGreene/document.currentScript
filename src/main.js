@@ -64,12 +64,12 @@ function getScriptUrlFromStack(stack, skipStackDepth) {
   skipStackDepth = ignoreMessage ? skipStackDepth : getStackDepthToSkip();
   if (typeof stack === "string" && stack) {
     if (ignoreMessage) {
-      matches = stack.match(/((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+      matches = stack.match(/((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
     }
     else {
-      matches = stack.match(/^(?:|[^:@]*@|.+\)@(?=http[s]?|file)|.+?\s+(?: at |@)(?:[^:\(]+ )*[\(]?)((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+      matches = stack.match(/^(?:|[^:@]*@|.+\)@(?=blob|http[s]?|file)|.+?\s+(?: at |@)(?:[^:\(]+ )*[\(]?)((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
       if (!(matches && matches[1])) {
-        matches = stack.match(/\)@((?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+        matches = stack.match(/\)@((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
         if (matches && matches[1]) {
           url = matches[1];
         }
