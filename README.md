@@ -1,6 +1,8 @@
-# document.currentScript
+# `document.currentScript`
 
-Polyfill for HTML5's [`document.currentScript`](http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html#dom-document-currentscript).
+Polyfill for HTML5's [`document.currentScript`](http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html#dom-document-currentscript) for IE9+.
+
+For IE < 9, you can use `document._currentScript()` instead.
 
 
 ## Demo

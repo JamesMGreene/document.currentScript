@@ -50,10 +50,10 @@
           browser:     "Safari 7.0 (iOS)",
           stackPrefix: "",
           stackSuffix: ":139:7\ndispatch@http://code.jquery.com/blah.js:123:12\nfoo"
-        }        
+        }
       ];
 
-  var externalStackTemplates =       [
+  var externalStackTemplates = [
         {
           browser:     "Chrome (Windows)",
           stackPrefix: "Error: my error\n    at window.onload (",
@@ -181,6 +181,30 @@
   });
 
 
+  test("`getScriptUrlFromStack` parses Data URI script stacks correctly", function(assert) {
+    // Arrange
+    var expectedUrls = [
+      "data:text/javascript,console.log(document.currentScript)%3B",
+      "data:text/javascript;charset=UTF-8,console.log(document.currentScript)%3B",
+      "data:text/javascript;charset=UTF-8;base64,Y29uc29sZS5sb2coZG9jdW1lbnQuY3VycmVudFNjcmlwdCk7",
+      "data:text/javascript;base64,Y29uc29sZS5sb2coZG9jdW1lbnQuY3VycmVudFNjcmlwdCk7"
+    ];
+    var stack;
+
+    assert.expect(externalStackTemplates.length * expectedUrls.length + 2);
+
+    // Act & Assert
+    assert.ok(externalStackTemplates.length > 0, "Should have a list of Data URI stack templates");
+    assert.ok(expectedUrls.length > 0, "Should have a list of Data URI script contents");
+    for (var i = 0, len = externalStackTemplates.length; i < len; i++) {
+      for (var j = 0, len2 = expectedUrls.length; j < len2; j++) {
+        stack = externalStackTemplates[i].stackPrefix + expectedUrls[j] + externalStackTemplates[i].stackSuffix;
+        assert.strictEqual(getScriptUrlFromStack(stack), expectedUrls[j], "Should work for Data URI stack (Variation #" + (j + 1) + ") from " + externalStackTemplates[i].browser);
+      }
+    }
+  });
+
+
 
   module("Match results from browsers with native support");
 
@@ -188,7 +212,7 @@
     assert.expect(1);
 
     if (hasNativeSupport) {
-      assert.strictEqual(document.currentScript, _currentScript(), "`_currentScript()` === native `document.currentScript`");
+      assert.strictEqual(_currentScript(), document.currentScript, "`_currentScript()` result should match native `document.currentScript`");
     }
     else {
       assert.ok(true, "This browser does not have native support for `document.currentScript`");
