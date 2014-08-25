@@ -27,16 +27,16 @@ function getScriptFromUrl(url) {
       }
     }
   }
-  //return undefined;
+  return null;
 }
 
-// If there is only a single inline script on the page, return it; otherwise `undefined`
+// If there is only a single inline script on the page, return it; otherwise `null`
 function getSoleInlineScript() {
-  var script;
+  var script = null;
   for (var i = 0, len = scripts.length; i < len; i++) {
     if (!scripts[i].src) {
       if (script) {
-        return undefined;
+        return null;
       }
       script = scripts[i];
     }
@@ -64,15 +64,13 @@ function getScriptUrlFromStack(stack, skipStackDepth) {
   skipStackDepth = ignoreMessage ? skipStackDepth : getStackDepthToSkip();
   if (typeof stack === "string" && stack) {
     if (ignoreMessage) {
-      matches = stack.match(/((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+      matches = stack.match(/(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
     }
     else {
-      matches = stack.match(/^(?:|[^:@]*@|.+\)@(?=blob|http[s]?|file)|.+?\s+(?: at |@)(?:[^:\(]+ )*[\(]?)((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+      matches = stack.match(/^(?:|[^:@]*@|.+\)@(?=data:text\/javascript|blob|http[s]?|file)|.+?\s+(?: at |@)(?:[^:\(]+ )*[\(]?)(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+
       if (!(matches && matches[1])) {
-        matches = stack.match(/\)@((?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
-        if (matches && matches[1]) {
-          url = matches[1];
-        }
+        matches = stack.match(/\)@(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
       }
     }
 
@@ -93,7 +91,7 @@ function getScriptUrlFromStack(stack, skipStackDepth) {
 function _currentScript() {
   // Yes, this IS actually possible
   if (scripts.length === 0) {
-    return;  //return undefined;
+    return null;
   }
 
   if (scripts.length === 1) {
@@ -134,7 +132,8 @@ function _currentScript() {
     }
     return script;
   }
-  //return undefined;
+
+  return null;
 }
 
 

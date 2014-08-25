@@ -8,10 +8,10 @@ var canDefineProp = typeof Object.defineProperty === "function" &&
     var result;
     try {
       Object.defineProperty(document, "_xyz", {
-        value: "blah",
-        enumerable: true,
-        writable: false,
-        configurable: false
+        get: function() {
+          return "blah";
+        },
+        configurable: true
       });
       result = document._xyz === "blah";
       delete document._xyz;
@@ -30,9 +30,7 @@ document._currentScript = _currentScript;
 if (needsPolyfill) {
   if (canDefineProp) {
     Object.defineProperty(document, "currentScript", {
-      get: _currentScript,
-      enumerable: true,
-      configurable: false
+      get: _currentScript
     });
   }
   else if (canDefineGetter) {
