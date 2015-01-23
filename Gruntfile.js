@@ -2,16 +2,12 @@
 
 module.exports = function(grunt) {
   "use strict";
-  var CONNECT_PORT = 8080,
-      BASE_URL = "http://localhost:"+CONNECT_PORT;
 
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-contrib-concat");
   grunt.loadNpmTasks("grunt-contrib-uglify");
-  grunt.loadNpmTasks("grunt-contrib-connect");
-  grunt.loadNpmTasks("grunt-contrib-qunit");
-  grunt.loadNpmTasks("grunt-saucelabs");
+  grunt.loadNpmTasks("grunt-karma");
 
   // Project configuration.
   grunt.initConfig({
@@ -57,33 +53,14 @@ module.exports = function(grunt) {
         dest: "dist/<%= pkg.title %>.min.js"
       }
     },
-    connect: {
-      server: {
-        options: {
-          base: "",
-          port: CONNECT_PORT
-        }
-      }
-    },
-    qunit: {
-      options: {
-        httpBase: BASE_URL
+    karma: {
+      local: {
+        configFile: "karma.conf.js",
+        autoWatch: false,
+        singleRun: true
       },
-      files: ["test/**/*.html"]
-    },
-    "saucelabs-qunit": {
-      all: {
-        options: {
-          urls: grunt.file.expand("test/**/*.html").map(function(specPath) {
-            return BASE_URL+"/"+specPath;
-          }),
-          tunnelTimeout: 5,
-          build: process.env.TRAVIS_JOB_ID || Date.now(),
-          concurrency: 3,
-          browsers: grunt.file.readYAML("browsers.yml"),
-          testname: "qunit tests",
-          tags: ["master"]
-        }
+      ci: {
+        configFile: "karma.conf-ci.js"
       }
     }
   });
@@ -94,8 +71,8 @@ module.exports = function(grunt) {
   grunt.registerTask("jshint-postbuild", ["jshint:dist"]);
 
   // Default task.
-  grunt.registerTask("default", ["jshint-prebuild", "concat", "uglify", "jshint-postbuild", "connect", "qunit"]);
+  grunt.registerTask("default", ["jshint-prebuild", "concat", "uglify", "jshint-postbuild", "karma:local"]);
   // TravisCI task.
-  grunt.registerTask("saucelabs",  ["jshint-prebuild", "concat", "jshint-postbuild", "connect", "saucelabs-qunit"]);
+  grunt.registerTask("travis",  ["jshint-prebuild", "concat", "jshint-postbuild", "karma:ci"]);
 
 };

@@ -1,9 +1,29 @@
 /*global QUnit, getScriptUrlFromStack, _currentScript */
 
-(function(module, test) {
+(function(module, test, skip) {
+  /*jshint maxstatements:false */
   "use strict";
 
   var hasNativeSupport = "currentScript" in document;
+
+  // Synchronous execution required here outside of the test callback context
+  var polyfillResultSync;
+  try {
+    polyfillResultSync = _currentScript();
+  }
+  catch (e) {
+    // Oh well....
+  }
+
+  var nativeResultSync;
+  if (hasNativeSupport) {
+    try {
+      nativeResultSync = document.currentScript;
+    }
+    catch (e) {
+      // Oh well....
+    }
+  }
 
   var inlineStackTemplates = [
         {
@@ -205,19 +225,76 @@
   });
 
 
+  module("`_currentScript()` follows the spec");
 
-  module("Match results from browsers with native support");
+  test("When invoked during a script's synchronous evaluation", function(assert) {
+    assert.expect(4);
 
-  test("`_currentScript()` result matches native `document.currentScript`", function(assert) {
+    var polyfillResultIsNonNullObject = polyfillResultSync != null && typeof polyfillResultSync === "object";
+    var polyfillResultSrc = polyfillResultIsNonNullObject ? (polyfillResultSync.hasAttribute("src") ? polyfillResultSync.src : null) : undefined;
+    var polyfillResultSrcSuffix = polyfillResultSrc ? polyfillResultSrc.replace(/\?.*$/, "").slice(-9).toLowerCase() : polyfillResultSrc;
+
+    assert.strictEqual(polyfillResultIsNonNullObject, true, "`_currentScript()` should return a non-`null` object");
+    assert.strictEqual(polyfillResultSync.nodeName, "SCRIPT", "`_currentScript()` should return a `script` node");
+    assert.strictEqual(polyfillResultSync.hasAttribute("src"), true, "`_currentScript()` should return a `script` node with a `src` attribute");
+    assert.strictEqual(polyfillResultSrcSuffix, "/tests.js", "`_currentScript().src` should return the test script's path");
+  });
+
+  test("When invoked outside of a script's synchronous evaluation (so, asynchronously)", function(assert) {
     assert.expect(1);
 
-    if (hasNativeSupport) {
-      assert.strictEqual(_currentScript(), document.currentScript, "`_currentScript()` result should match native `document.currentScript`");
-    }
-    else {
-      assert.ok(true, "This browser does not have native support for `document.currentScript`");
-    }
+    // While QUnit currently invokes these test callback functions asynchronously,
+    // I want to guarantee the parameters of this test setup even if that fact
+    // changes in the future. As such, let's force asynchrony here.
+    var done = assert.async();
+
+    setTimeout(function() {
+      assert.strictEqual(_currentScript(), null, "`_currentScript()` should return `null`");
+      done();
+    }, 13);
   });
 
 
-})(QUnit.module, QUnit.test);
+  module("Native `document.currentScript` follows the spec");
+
+  (hasNativeSupport ? test : skip)("When invoked during a script's synchronous evaluation", function(assert) {
+    assert.expect(4);
+
+    var nativeResultIsNonNullObject = nativeResultSync != null && typeof nativeResultSync === "object";
+    var nativeResultSrc = nativeResultIsNonNullObject ? (nativeResultSync.hasAttribute("src") ? nativeResultSync.src : null) : undefined;
+    var nativeResultSrcSuffix = nativeResultSrc ? nativeResultSrc.replace(/\?.*$/, "").slice(-9).toLowerCase() : nativeResultSrc;
+
+    assert.strictEqual(nativeResultIsNonNullObject, true, "`document.currentScript` should return a non-`null` object");
+    assert.strictEqual(nativeResultSync.nodeName, "SCRIPT", "`document.currentScript` should return a `script` node");
+    assert.strictEqual(nativeResultSync.hasAttribute("src"), true, "`document.currentScript` should return a `script` node with a `src` attribute");
+    assert.strictEqual(nativeResultSrcSuffix, "/tests.js", "`document.currentScript.src` should return the test script's path");
+  });
+
+  (hasNativeSupport ? test : skip)("When invoked outside of a script's synchronous evaluation (so, asynchronously)", function(assert) {
+    assert.expect(1);
+
+    // While QUnit currently invokes these test callback functions asynchronously,
+    // I want to guarantee the parameters of this test setup even if that fact
+    // changes in the future. As such, let's force asynchrony here.
+    var done = assert.async();
+
+    setTimeout(function() {
+      assert.strictEqual(document.currentScript, null, "`document.currentScript` should return `null`");
+      done();
+    }, 13);
+  });
+
+
+  module("`_currentScript()` and native `document.currentScript` results match");
+
+  (hasNativeSupport ? test : skip)("When invoked during a script's synchronous evaluation", function(assert) {
+    assert.expect(1);
+    assert.strictEqual(polyfillResultSync, nativeResultSync, "Results should match");
+  });
+
+  (hasNativeSupport ? test : skip)("When invoked outside of a script's synchronous evaluation (so, asynchronously)", function(assert) {
+    assert.expect(1);
+    assert.strictEqual(_currentScript(), document.currentScript, "Results should match");
+  });
+
+})(QUnit.module, QUnit.test, QUnit.skip);
