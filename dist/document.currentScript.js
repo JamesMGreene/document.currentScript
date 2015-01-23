@@ -4,7 +4,7 @@
  * Copyright (c) 2015 James M. Greene
  * Licensed MIT
  * http://jsfiddle.net/JamesMGreene/9DFc9/
- * v0.1.6
+ * v0.1.7
  */
 (function() {
 
