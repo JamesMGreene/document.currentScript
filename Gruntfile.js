@@ -29,6 +29,7 @@ module.exports = function(grunt) {
         jshintrc: true
       },
       gruntfile: ["Gruntfile.js"],
+      karma: ["karma.conf*.js"],
       js: ["src/**/*.js", "!src/start.js", "!src/end.js"],
       test: ["test/**/*.js"],
       dist: ["dist/*.js", "!dist/*.min.js"]
@@ -67,7 +68,7 @@ module.exports = function(grunt) {
 
 
   // Helper tasks
-  grunt.registerTask("jshint-prebuild",  ["jshint:gruntfile", "jshint:js", "jshint:test"]);
+  grunt.registerTask("jshint-prebuild",  ["jshint:gruntfile", "jshint:karma", "jshint:js", "jshint:test"]);
   grunt.registerTask("jshint-postbuild", ["jshint:dist"]);
 
   // Default task.

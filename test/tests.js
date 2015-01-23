@@ -1,7 +1,7 @@
 /*global QUnit, getScriptUrlFromStack, _currentScript */
+/*jshint maxstatements:false */
 
 (function(module, test, skip) {
-  /*jshint maxstatements:false */
   "use strict";
 
   var hasNativeSupport = "currentScript" in document;

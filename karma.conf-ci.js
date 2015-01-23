@@ -1,15 +1,17 @@
-var fs = require('fs');
+/*jshint node:true, maxstatements: false, maxlen: false */
+
+var fs = require("fs");
 
 module.exports = function(config) {
 
   // Use ENV vars on Travis and sauce.json locally to get credentials
   if (!process.env.SAUCE_USERNAME) {
-    if (!fs.existsSync('sauce.json')) {
-      console.log('Create a "sauce.json" file with your credentials.');
+    if (!fs.existsSync("sauce.json")) {
+      console.log("Create a \"sauce.json\" file with your credentials.");
       process.exit(1);
     } else {
-      process.env.SAUCE_USERNAME = require('./sauce').username;
-      process.env.SAUCE_ACCESS_KEY = require('./sauce').accessKey;
+      process.env.SAUCE_USERNAME = require("./sauce").username;
+      process.env.SAUCE_ACCESS_KEY = require("./sauce").accessKey;
     }
   }
 
@@ -19,25 +21,25 @@ module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
+    basePath: "",
 
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['qunit'],
+    frameworks: ["qunit"],
 
 
     // list of files / patterns to load in the browser
     files: [
-      'src/main.js',
-      'test/*.js'
+      "src/main.js",
+      "test/*.js"
     ],
 
 
     // test results reporter to use
-    // possible values: 'dots', 'progress'
+    // possible values: "dots", "progress"
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['dots', 'saucelabs'],
+    reporters: ["dots", "saucelabs"],
 
 
     // web server port
@@ -51,7 +53,7 @@ module.exports = function(config) {
 
     sauceLabs: {
 
-      testName: '`document.currentScript` polyfill unit tests',
+      testName: "`document.currentScript` polyfill unit tests",
 
       // For full list of Travis environment variables, see:
       //   http://docs.travis-ci.com/user/ci-environment/#Environment-variables
@@ -64,12 +66,12 @@ module.exports = function(config) {
         ]
         .filter(function(t) {
           // Remove useless tags
-          return !!tag && tag !== "false";
+          return !!t && t !== "false";
         }),
 
       recordScreenshots: true,
 
-      public: "public"
+      "public": "public"
 
     },
 
@@ -90,34 +92,34 @@ module.exports = function(config) {
 //
 
 function getFriendlyBrowser(browserName) {
-  browserName = browserName || '';
-  if (typeof browserName === 'string' && browserName) {
-    if (browserName === 'internet explorer') {
-      browserName = 'ie';
+  browserName = browserName || "";
+  if (typeof browserName === "string" && browserName) {
+    if (browserName === "internet explorer") {
+      browserName = "ie";
     }
-    else if (browserName === 'iphone') {
-      browserName = 'safari';
+    else if (browserName === "iphone") {
+      browserName = "safari";
     }
-    else if (browserName === 'android') {
-      browserName = 'browser';
+    else if (browserName === "android") {
+      browserName = "browser";
     }
   }
   return browserName;
 }
 
 function getFriendlyOS(osName, browserName) {
-  osName = osName || '';
-  browserName = browserName || '';
+  osName = osName || "";
+  browserName = browserName || "";
 
-  if (typeof osName === 'string' && osName) {
+  if (typeof osName === "string" && osName) {
     if (/^Windows /.test(osName)) {
-      osName = 'win';
+      osName = "win";
     }
     else if (/^OS X /.test(osName)) {
-      osName = browserName === 'iphone' ? 'ios' : 'mac';
+      osName = browserName === "iphone" ? "ios" : "mac";
     }
-    else if (osName === 'Linux') {
-      osName = browserName === 'android' ? 'android' : 'linux';
+    else if (osName === "Linux") {
+      osName = browserName === "android" ? "android" : "linux";
     }
   }
   return osName;
@@ -126,8 +128,8 @@ function getFriendlyOS(osName, browserName) {
 function getKeyName(osName, browserName, version) {
   osName = getFriendlyOS(osName, browserName);
   browserName = getFriendlyBrowser(browserName);
-  version = version === '' ? 'latest' : version;
-  return 'sl_' + osName + '_' + browserName + '_' + version;
+  version = version === "" ? "latest" : version;
+  return "sl_" + osName + "_" + browserName + "_" + version;
 }
 
 function prefixTag(tagValue, tagPrefix) {
@@ -136,36 +138,36 @@ function prefixTag(tagValue, tagPrefix) {
 
 function generateCustomLaunchers() {
   var browsers = {
-    'internet explorer': {
-      '11': ['Windows 8.1'],
-      '10': ['Windows 8'],
-      '9':  ['Windows 7'],
-      '8':  ['Windows 7']
-    }
-    'firefox': {
-      'dev':  ['Windows 7', 'OS X 10.9', 'Linux'],
-      'beta': ['Windows 7', 'OS X 10.9', 'Linux'],
-      '':     ['Windows 7', 'OS X 10.9', 'Linux']
+    "internet explorer": {
+      "11": ["Windows 8.1"],
+      "10": ["Windows 8"],
+      "9":  ["Windows 7"],
+      "8":  ["Windows 7"]
     },
-    'chrome': {
-      'dev':  ['Windows 7', 'OS X 10.8', 'Linux'],
-      'beta': ['Windows 7', 'OS X 10.8', 'Linux'],
-      '':     ['Windows 7', 'OS X 10.8', 'Linux']
+    "firefox": {
+      "dev":  ["Windows 7", "OS X 10.9", "Linux"],
+      "beta": ["Windows 7", "OS X 10.9", "Linux"],
+      "":     ["Windows 7", "OS X 10.9", "Linux"]
     },
-    'safari': {
-      '8': ['OS X 10.10'],
-      '7': ['OS X 10.9'],
-      '6': ['OS X 10.8'],
-      '5': ['OS X 10.6']
+    "chrome": {
+      "dev":  ["Windows 7", "OS X 10.8", "Linux"],
+      "beta": ["Windows 7", "OS X 10.8", "Linux"],
+      "":     ["Windows 7", "OS X 10.8", "Linux"]
     },
-    'opera': {
-      '12': ['Windows 7', 'Linux']
+    "safari": {
+      "8": ["OS X 10.10"],
+      "7": ["OS X 10.9"],
+      "6": ["OS X 10.8"],
+      "5": ["OS X 10.6"]
     },
-    'android': {
-      '4.0': ['Linux']
+    "opera": {
+      "12": ["Windows 7", "Linux"]
     },
-    'iphone': {
-      '7.1': ['OS X 10.9']
+    "android": {
+      "4.0": ["Linux"]
+    },
+    "iphone": {
+      "7.1": ["OS X 10.9"]
     }
   };
 
@@ -175,10 +177,10 @@ function generateCustomLaunchers() {
       browsers[browserName][version].forEach(function(osName) {
         var key = getKeyName(osName, browserName, version);
         if (matrix[key]) {
-          throw new Error('Generated duplicate key: ' + JSON.stringify(key));
+          throw new Error("Generated duplicate key: " + JSON.stringify(key));
         }
         matrix[key] = {
-          base: 'SauceLabs',
+          base: "SauceLabs",
           browserName: browserName,
           platform: osName,
           version: version

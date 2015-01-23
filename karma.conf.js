@@ -1,26 +1,28 @@
+/*jshint node:true, maxstatements: false, maxlen: false */
+
 // Karma configuration for local
 module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
+    basePath: "",
 
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['qunit'],
+    frameworks: ["qunit"],
 
 
     // list of files / patterns to load in the browser
     files: [
-      'src/main.js',
-      'test/*.js'
+      "src/main.js",
+      "test/*.js"
     ],
 
     // test results reporter to use
-    // possible values: 'dots', 'progress'
+    // possible values: "dots", "progress"
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['spec'],
+    reporters: ["spec"],
 
 
     // web server port
@@ -48,7 +50,7 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: ['PhantomJS', 'Chrome', 'Firefox', 'Safari'],
+    browsers: ["PhantomJS", "Chrome", "Firefox", "Safari"],
 
 
     // Continuous Integration mode
