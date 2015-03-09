@@ -1,11 +1,28 @@
 /*jshint node:true, maxstatements: false, maxlen: false */
 
+var fs = require("fs");
+var path = require("path");
+
+function getDirectories(srcPath) {
+  return fs.readdirSync(srcPath).filter(function(file) {
+    return fs.statSync(path.join(srcPath, file)).isDirectory();
+  });
+}
+
 // Karma configuration for local
 module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: "",
+
+
+    // Load plugins as needed
+    plugins:
+      getDirectories(path.resolve(path.join(__dirname, "/node_modules")))
+        .filter(function(dirName) {
+          return dirName.toLowerCase().slice(0, 6) === "karma-";
+        }),
 
 
     // frameworks to use
