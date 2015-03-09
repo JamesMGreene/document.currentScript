@@ -1,4 +1,5 @@
 /*jshint node:true, maxstatements: false, maxlen: false */
+/*global JSON:false */
 
 var fs = require("fs");
 var path = require("path");
