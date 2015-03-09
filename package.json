@@ -28,7 +28,7 @@
     "url": "https://github.com/JamesMGreene/document.currentScript/issues"
   },
   "scripts": {
-    "test": "grunt travis --verbose"
+    "test": "grunt travis --force --verbose"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
