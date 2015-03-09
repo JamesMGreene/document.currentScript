@@ -76,10 +76,10 @@ module.exports = function(grunt) {
                 var target = {
                   configFile: taskConfig.ci.configFile
                 };
-                target.browsers = conf.browsers.slice(i, maxConcurrency);
+                target.browsers = conf.browsers.slice(i, i + maxConcurrency);
                 var targetName = "ci_" + ((i / maxConcurrency) + 1);
                 taskConfig[targetName] = target;
-                karmaCiTaskChain.push(targetName);
+                karmaCiTaskChain.push("karma:" + targetName);
               }
             }
           }
