@@ -24,17 +24,17 @@ var canDefineProp = typeof Object.defineProperty === "function" &&
 
 
 // Add the "private" property for testing, even if the real property can be polyfilled
-document._currentScript = _currentScript;
+document._currentScript = _currentEvaluatingScript;
 
 // Polyfill it!
 if (needsPolyfill) {
   if (canDefineProp) {
     Object.defineProperty(document, "currentScript", {
-      get: _currentScript
+      get: _currentEvaluatingScript
     });
   }
   else if (canDefineGetter) {
-    document.__defineGetter__("currentScript", _currentScript);
+    document.__defineGetter__("currentScript", _currentEvaluatingScript);
   }
 }
 

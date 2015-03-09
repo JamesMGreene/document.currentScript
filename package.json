@@ -1,14 +1,14 @@
 {
   "name": "currentscript",
   "title": "document.currentScript",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "description": "Polyfill for `document.currentScript`.",
   "keywords": [
     "document",
     "currentScript"
   ],
   "main": "./dist/document.currentScript.js",
-  "homepage": "http://jsfiddle.net/JamesMGreene/9DFc9/",
+  "homepage": "https://github.com/JamesMGreene/document.currentScript",
   "licenses": [
     {
       "type": "MIT",
@@ -26,9 +26,6 @@
   },
   "bugs": {
     "url": "https://github.com/JamesMGreene/document.currentScript/issues"
-  },
-  "engines": {
-    "node": ">= 0.10.0"
   },
   "scripts": {
     "test": "grunt travis --verbose"

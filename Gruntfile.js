@@ -54,18 +54,47 @@ module.exports = function(grunt) {
         dest: "dist/<%= pkg.title %>.min.js"
       }
     },
-    karma: {
-      local: {
-        configFile: "karma.conf.js",
-        autoWatch: false,
-        singleRun: true
-      },
-      ci: {
-        configFile: "karma.conf-ci.js"
-      }
-    }
-  });
+    karma: (function() {
+      var taskConfig = {
+        local: {
+          configFile: "karma.conf.js",
+          autoWatch: false,
+          singleRun: true
+        },
+        ci: {
+          configFile: "karma.conf-ci.js"
+        }
+      };
+      var maxConcurrency = 3;
+      var karmaConfCi = require("./" + taskConfig.ci.configFile);
+      var karmaCiTaskChain = [];
+      karmaConfCi(
+        {
+          set: function(conf) {
+            if (conf.browsers && conf.browsers.length > 0) {
+              for (var i = 0, len = conf.browsers.length; i < len; i += maxConcurrency) {
+                var target = {
+                  configFile: taskConfig.ci.configFile
+                };
+                target.browsers = conf.browsers.slice(i, maxConcurrency);
+                var targetName = "ci_" + ((i / maxConcurrency) + 1);
+                taskConfig[targetName] = target;
+                karmaCiTaskChain.push(targetName);
+              }
+            }
+          }
+        },
+        true
+      );
 
+      // `grunt-karma` does not correctly honor buffering launcher
+      // requests to the limit of maxConcurrency of a SauceLabs
+      // account, which usually results in lots of errors
+      grunt.registerTask("karma-ci-chain", karmaCiTaskChain);
+
+      return taskConfig;
+    })()
+  });
 
   // Helper tasks
   grunt.registerTask("jshint-prebuild",  ["jshint:gruntfile", "jshint:karma", "jshint:js", "jshint:test"]);
@@ -74,6 +103,6 @@ module.exports = function(grunt) {
   // Default task.
   grunt.registerTask("default", ["jshint-prebuild", "concat", "uglify", "jshint-postbuild", "karma:local"]);
   // TravisCI task.
-  grunt.registerTask("travis",  ["jshint-prebuild", "concat", "jshint-postbuild", "karma:ci"]);
+  grunt.registerTask("travis",  ["jshint-prebuild", "concat", "jshint-postbuild", "karma-ci-chain"]);
 
 };

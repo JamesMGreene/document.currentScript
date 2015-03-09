@@ -1,104 +1,79 @@
-var hasStackBeforeThrowing = false,
-    hasStackAfterThrowing = false;
-(function() {
-  try {
-    var err = new Error();
-    hasStackBeforeThrowing = typeof err.stack === "string" && !!err.stack;
-    throw err;
-  }
-  catch (thrownErr) {
-    hasStackAfterThrowing = typeof thrownErr.stack === "string" && !!thrownErr.stack;
-  }
-})();
-
-
-// This page's URL
-var pageUrl = window.location.href;
-
 // Live NodeList collection
 var scripts = document.getElementsByTagName("script");
 
-// Get script object based on the `src` URL
-function getScriptFromUrl(url) {
-  if (typeof url === "string" && url) {
-    for (var i = 0, len = scripts.length; i < len; i++) {
-      if (scripts[i].src === url) {
-        return scripts[i];
-      }
+// Check if the browser supports the `readyState` property on `script` elements
+var supportsScriptReadyState = "readyState" in (scripts[0] || document.createElement("script"));
+
+// Lousy browser detection for [not] Opera
+var isNotOpera = !window.opera || window.opera.toString() !== "[object Opera]";
+
+// Attempt to retrieve the native `document.currentScript` accessor method
+var nativeCurrentScriptFn = (function(doc) {
+  /*jshint proto:true */
+
+  var hasNativeMethod = "currentScript" in doc;
+  var canLookupGetter = doc.__lookupGetter__;
+  var canGetDescriptor = typeof Object.getOwnPropertyDescriptor === "function";
+  var canGetPrototype = typeof Object.getPrototypeOf === "function";
+  var canUseDunderProto = typeof "test".__proto__ === "object";
+
+  function _getProto(obj) {
+    var proto;
+    if (obj != null) {
+      proto = (
+        canGetPrototype ? Object.getPrototypeOf(obj) :
+          canUseDunderProto ? obj.__proto__ :
+            obj.constructor != null ? obj.constructor.prototype :
+              undefined
+      );
     }
+    return proto;
   }
-  return null;
-}
 
-// If there is only a single inline script on the page, return it; otherwise `null`
-function getSoleInlineScript() {
-  var script = null;
-  for (var i = 0, len = scripts.length; i < len; i++) {
-    if (!scripts[i].src) {
-      if (script) {
-        return null;
+  var nativeFn = (function _getCurrentScriptDef(docSelfOrAncestor, doc) {
+    var des, cs;
+    if (
+      hasNativeMethod && (canLookupGetter || canGetDescriptor) &&
+      docSelfOrAncestor && docSelfOrAncestor !== Object.prototype &&
+      doc && doc !== Object.prototype
+    ) {
+      if (canGetDescriptor) {
+        des = Object.getOwnPropertyDescriptor(docSelfOrAncestor, "currentScript") || undefined;
+        if (des && typeof des.get === "function") {
+          cs = des.get;
+        }
       }
-      script = scripts[i];
-    }
-  }
-  return script;
-}
-
-// Get the configured default value for how many layers of stack depth to ignore
-function getStackDepthToSkip() {
-  var depth = 0;
-  if (
-    typeof _currentScript !== "undefined" &&
-    _currentScript &&
-    typeof _currentScript.skipStackDepth === "number"
-  ) {
-    depth = _currentScript.skipStackDepth;
-  }
-  return depth;
-}
-
-// Get the currently executing script URL from an Error stack trace
-function getScriptUrlFromStack(stack, skipStackDepth) {
-  var url, matches, remainingStack,
-      ignoreMessage = typeof skipStackDepth === "number";
-  skipStackDepth = ignoreMessage ? skipStackDepth : getStackDepthToSkip();
-  if (typeof stack === "string" && stack) {
-    if (ignoreMessage) {
-      matches = stack.match(/(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
-    }
-    else {
-      matches = stack.match(/^(?:|[^:@]*@|.+\)@(?=data:text\/javascript|blob|http[s]?|file)|.+?\s+(?: at |@)(?:[^:\(]+ )*[\(]?)(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
-
-      if (!(matches && matches[1])) {
-        matches = stack.match(/\)@(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?/);
+      if (!cs && canLookupGetter) {
+        cs = doc.__lookupGetter__("currentScript") || undefined;
+      }
+      if (!cs) {
+        cs = _getCurrentScriptDef(_getProto(docSelfOrAncestor), doc);
       }
     }
+    return cs;
+  })(doc, doc);
 
-    if (matches && matches[1]) {
-      if (skipStackDepth > 0) {
-        remainingStack = stack.slice(stack.indexOf(matches[0]) + matches[0].length);
-        url = getScriptUrlFromStack(remainingStack, (skipStackDepth - 1));
-      }
-      else {
-        url = matches[1];
-      }
-    }
-  }
-  return url;
-}
+  return nativeFn;
+})(document);
 
-// Get the currently executing `script` DOM element
-function _currentScript() {
-  // Yes, this IS actually possible
+
+
+// Top-level API (compliant with `document.currentScript` specifications)
+//
+// Get the currently "executing" (i.e. EVALUATING) `script` DOM
+// element, per the spec requirements for `document.currentScript`.
+//
+// IMPORTANT: This polyfill CANNOT achieve 100% accurate results
+//            cross-browser. ;_;
+function _currentEvaluatingScript() {
+  // Yes, this IS possible, i.e. if a script removes other scripts (or itself)
   if (scripts.length === 0) {
     return null;
   }
 
-  if (scripts.length === 1) {
-    return scripts[0];
-  }
-
-  if ("readyState" in scripts[0]) {
+  // Guaranteed accurate in IE 6-10.
+  // Not supported in any other browsers. =(
+  if (supportsScriptReadyState && isNotOpera) {
     for (var i = scripts.length; i--; ) {
       if (scripts[i].readyState === "interactive") {
         return scripts[i];
@@ -106,36 +81,20 @@ function _currentScript() {
     }
   }
 
-  if (document.readyState === "loading") {
-    return scripts[scripts.length - 1];
+  // If the native method exists, defer to that as a last-ditch effort
+  if (
+    typeof nativeCurrentScriptFn === "function" &&
+    _currentEvaluatingScript.doNotDeferToNativeMethod !== true
+  ) {
+    return nativeCurrentScriptFn.call(document);
   }
 
-  var stack,
-      e = new Error();
-  if (hasStackBeforeThrowing) {
-    stack = e.stack;
-  }
-  if (!stack && hasStackAfterThrowing) {
-    try {
-      throw e;
-    }
-    catch (err) {
-      // NOTE: Cannot use `err.sourceURL` or `err.fileName` as they will always be THIS script
-      stack = err.stack;
-    }
-  }
-  if (stack) {
-    var url = getScriptUrlFromStack(stack);
-    var script = getScriptFromUrl(url);
-    if (!script && url === pageUrl) {
-      script = getSoleInlineScript();
-    }
-    return script;
-  }
-
+  // Any other attempts cannot be guaranteed and, as such, should be left out
+  // from this "Strict Mode" behavior.
+  // Alas, returning `null` here is not necessarily accurate either.
   return null;
 }
 
-
-// Configuration
-_currentScript.skipStackDepth = 1;
+// Allow a last-ditch effort to use the native `document.currentScript` accessor
+// method (if it exists and can be retrieved)?
+_currentEvaluatingScript.doNotDeferToNativeMethod = false;

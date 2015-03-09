@@ -2,14 +2,17 @@
 
 var fs = require("fs");
 
-module.exports = function(config) {
+module.exports = function(config, gruntConfigOverride) {
 
   // Use ENV vars on Travis and sauce.json locally to get credentials
   if (!process.env.SAUCE_USERNAME) {
     if (!fs.existsSync("sauce.json")) {
-      console.log("Create a \"sauce.json\" file with your credentials.");
-      process.exit(1);
-    } else {
+      if (gruntConfigOverride !== true) {
+        console.log("Create a \"sauce.json\" file with your credentials.");
+        process.exit(1);
+      }
+    }
+    else {
       process.env.SAUCE_USERNAME = require("./sauce").username;
       process.env.SAUCE_ACCESS_KEY = require("./sauce").accessKey;
     }
@@ -139,10 +142,12 @@ function prefixTag(tagValue, tagPrefix) {
 function generateCustomLaunchers() {
   var browsers = {
     "internet explorer": {
-      "11": ["Windows 8.1"],
-      "10": ["Windows 8"],
-      "9":  ["Windows 7"],
-      "8":  ["Windows 7"]
+      "11.0": ["Windows 8.1"],
+      "10.0": ["Windows 8"],
+      "9.0":  ["Windows 7"],
+      "8.0":  ["Windows 7"],
+      "7.0":  ["Windows XP"],
+      "6.0":  ["Windows XP"]
     },
     "firefox": {
       "dev":  ["Windows 7", "OS X 10.9", "Linux"],
@@ -155,19 +160,23 @@ function generateCustomLaunchers() {
       "":     ["Windows 7", "OS X 10.8", "Linux"]
     },
     "safari": {
-      "8": ["OS X 10.10"],
-      "7": ["OS X 10.9"],
-      "6": ["OS X 10.8"],
-      "5": ["OS X 10.6"]
+      "8.0": ["OS X 10.10"],
+      "7.0": ["OS X 10.9"],
+      "6.0": ["OS X 10.8"],
+      "5.1": ["OS X 10.6", "Windows 7"]
     },
     "opera": {
-      "12": ["Windows 7", "Linux"]
+      "12.15": ["Linux"],
+      "12.12": ["Windows 7"],
+      "11.64": ["Windows 7"]
     },
     "android": {
+      "4.4": ["Linux"],
       "4.0": ["Linux"]
     },
     "iphone": {
-      "7.1": ["OS X 10.9"]
+      "8.1": ["OS X 10.10"],
+      "7.1": ["OS X 10.10"]
     }
   };
 
@@ -185,6 +194,14 @@ function generateCustomLaunchers() {
           platform: osName,
           version: version
         };
+        if (browserName === "android") {
+          matrix[key].deviceName = "Android Emulator";
+          matrix[key]["device-orientation"] = "portrait";
+        }
+        if (browserName === "iphone") {
+          matrix[key].deviceName = "iPhone Simulator";
+          matrix[key]["device-orientation"] = "portrait";
+        }
       });
     });
   });
