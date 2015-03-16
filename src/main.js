@@ -17,6 +17,28 @@ var nativeCurrentScriptFn = (function(doc) {
   var canGetPrototype = typeof Object.getPrototypeOf === "function";
   var canUseDunderProto = typeof "test".__proto__ === "object";
 
+
+  function _invokeNativeCurrentScriptMethod() {
+    var des, getter,
+        csFnIsNotOurs = true;
+
+    if (canGetDescriptor) {
+      des = Object.getOwnPropertyDescriptor(doc, "currentScript") || undefined;
+      if (des && typeof des.get === "function" && des.get === _currentEvaluatingScript) {
+        csFnIsNotOurs = false;
+      }
+    }
+    if (csFnIsNotOurs && canLookupGetter) {
+      getter = doc.__lookupGetter__("currentScript") || undefined;
+      if (typeof getter === "function" && getter === _currentEvaluatingScript) {
+        csFnIsNotOurs = false;
+      }
+    }
+
+    // Potentially dangerous hack...
+    return csFnIsNotOurs ? doc.currentScript : null;
+  }
+
   function _getProto(obj) {
     var proto;
     if (obj != null) {
@@ -32,6 +54,7 @@ var nativeCurrentScriptFn = (function(doc) {
 
   var nativeFn = (function _getCurrentScriptDef(docSelfOrAncestor, doc) {
     var des, cs;
+
     if (
       hasNativeMethod && (canLookupGetter || canGetDescriptor) &&
       docSelfOrAncestor && docSelfOrAncestor !== Object.prototype &&
@@ -44,12 +67,20 @@ var nativeCurrentScriptFn = (function(doc) {
         }
       }
       if (!cs && canLookupGetter) {
-        cs = doc.__lookupGetter__("currentScript") || undefined;
+        cs = docSelfOrAncestor.__lookupGetter__("currentScript") || undefined;
       }
       if (!cs) {
         cs = _getCurrentScriptDef(_getProto(docSelfOrAncestor), doc);
       }
     }
+
+    if (!cs) {
+      cs = _invokeNativeCurrentScriptMethod;
+    }
+    else if (cs === _currentEvaluatingScript) {
+      cs = undefined;
+    }
+
     return cs;
   })(doc, doc);
 
