@@ -4,8 +4,15 @@
   "version": "1.0.2",
   "description": "Polyfill for `document.currentScript`.",
   "keywords": [
+    "browser",
     "document",
-    "currentScript"
+    "currentScript",
+    "html",
+    "dom",
+    "html5",
+    "spec-compliant",
+    "polyfill",
+    "shim"
   ],
   "main": "./dist/document.currentScript.js",
   "homepage": "https://github.com/JamesMGreene/document.currentScript",
