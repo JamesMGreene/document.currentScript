@@ -4,7 +4,7 @@
  * Copyright (c) 2015 James M. Greene
  * Licensed MIT
  * https://github.com/JamesMGreene/document.currentScript
- * v1.0.3
+ * v1.0.4
  */
 (function() {
 
