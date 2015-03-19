@@ -5,6 +5,10 @@
 
 Polyfill of HTML5's [`document.currentScript`](http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html#dom-document-currentscript) for IE 6-10 _**ONLY**_.
 
+## Public Service Announcement (PSA)
+
+This polyfill will not work in IE11 because of a critical design choice made Microsoft ("Don't Call Me IE!") [\[1\]](https://msdn.microsoft.com/en-us/library/ie/bg182625.aspx)[\[2\]](https://msdn.microsoft.com/en-us/library/ie/dn384059.aspx)[\[3\]](http://www.nczonline.net/blog/2013/07/02/internet-explorer-11-dont-call-me-ie/)[\[4\]](http://blog.getify.com/ie11-please-bring-real-script-preloading-back/) in order to avoid consumers receiving an unnecessarily downgraded experience on websites that were making logic branch and feature decisions based on browser detection rather than feature detection. If you want to help ensure that IE12+ (and/or the Microsoft "Spartan" browser), please upvote [this issue on the IE Platform Suggestion Forum](https://wpdev.uservoice.com/forums/257854-internet-explorer-platform/suggestions/6965085-support-document-currentscript-property)!
+
 
 ## Overview
 
@@ -12,14 +16,13 @@ Polyfill of HTML5's [`document.currentScript`](http://www.whatwg.org/specs/web-a
 
 This polyfill is configured do its best to comply with the HTML spec's definition of the correct behavior for `document.currentScript`.
 
-More particularly, this will get the `script` element that was the source of the nearest currently executing code _but **ONLY** if said source script is being **evaluated _synchronously_** for the first time by the browser.
+More particularly, this will get the `script` element that was the source of the nearest currently executing code _but **ONLY** if said source script is being **evaluated synchronously** for the first time by the browser._
 
 In other words, if code is being operated on _after_ its **initial** evaluation (e.g. async callbacks, functions invoked by user actions, etc.), then `document.currentScript` will always return `null`.
 
 ### Loose
 
 If you are interested in getting the currently _executing_ script [regardless of the source/trigger of the exection], take a look at [JamesMGreene/currentExecutingScript](https://github.com/JamesMGreene/currentExecutingScript) instead.
-
 
 ## Browser Compatibility
 
@@ -33,7 +36,6 @@ If you are interested in getting the currently _executing_ script [regardless of
 | IE      |       11 |  :-1:  | IE removed `script.readyState` but didn't add `document.currentScript` yet! :astonished: |
 | *       |        * | :question: | Only if the browser natively supports `document.currentScript`. |
 
-
 ## Usage
 
 ### IE 9-10
@@ -42,12 +44,11 @@ If you are interested in getting the currently _executing_ script [regardless of
 var scriptEl = document.currentScript;
 ```
 
-### IE 6-8 (and IE 9-10)
+### IE 6-8 (and IE 9-10
 
 ```js
 var scriptEl = document._currentScript();
 ```
-
 
 ## Configuration
 
@@ -61,13 +62,11 @@ However, if you would prefer to disallow that fallback behavior, you can do so a
 document._currentScript.doNotDeferToNativeMethod = true;
 ```
 
-
 ## Other Documentation
 
- - MDN docs: https://developer.mozilla.org/en-US/docs/Web/API/document.currentScript
-
+- MDN docs: https://developer.mozilla.org/en-US/docs/Web/API/document.currentScript
 
 ## Errata
 
- - Demo using old Gist: http://jsfiddle.net/JamesMGreene/9DFc9/
- - Original location, old Gist: https://gist.github.com/JamesMGreene/fb4a71e060da6e26511d
+- Demo using old Gist: http://jsfiddle.net/JamesMGreene/9DFc9/
+- Original location, old Gist: https://gist.github.com/JamesMGreene/fb4a71e060da6e26511d
