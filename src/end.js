@@ -2,7 +2,6 @@
 
 // Inspect the polyfill-ability of this browser
 var needsPolyfill = !("currentScript" in document);
-var canDefineGetter = document.__defineGetter__;
 var canDefineProp = typeof Object.defineProperty === "function" &&
   (function() {
     var result;
@@ -27,15 +26,10 @@ var canDefineProp = typeof Object.defineProperty === "function" &&
 document._currentScript = _currentEvaluatingScript;
 
 // Polyfill it!
-if (needsPolyfill) {
-  if (canDefineProp) {
-    Object.defineProperty(document, "currentScript", {
-      get: _currentEvaluatingScript
-    });
-  }
-  else if (canDefineGetter) {
-    document.__defineGetter__("currentScript", _currentEvaluatingScript);
-  }
+if (needsPolyfill && canDefineProp) {
+  Object.defineProperty(document, "currentScript", {
+    get: _currentEvaluatingScript
+  });
 }
 
 })();

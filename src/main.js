@@ -12,25 +12,18 @@ var nativeCurrentScriptFn = (function(doc) {
   /*jshint proto:true */
 
   var hasNativeMethod = "currentScript" in doc;
-  var canLookupGetter = doc.__lookupGetter__;
   var canGetDescriptor = typeof Object.getOwnPropertyDescriptor === "function";
   var canGetPrototype = typeof Object.getPrototypeOf === "function";
   var canUseDunderProto = typeof "test".__proto__ === "object";
 
 
   function _invokeNativeCurrentScriptMethod() {
-    var des, getter,
+    var des,
         csFnIsNotOurs = true;
 
     if (canGetDescriptor) {
       des = Object.getOwnPropertyDescriptor(doc, "currentScript") || undefined;
       if (des && typeof des.get === "function" && des.get === _currentEvaluatingScript) {
-        csFnIsNotOurs = false;
-      }
-    }
-    if (csFnIsNotOurs && canLookupGetter) {
-      getter = doc.__lookupGetter__("currentScript") || undefined;
-      if (typeof getter === "function" && getter === _currentEvaluatingScript) {
         csFnIsNotOurs = false;
       }
     }
@@ -56,7 +49,7 @@ var nativeCurrentScriptFn = (function(doc) {
     var des, cs;
 
     if (
-      hasNativeMethod && (canLookupGetter || canGetDescriptor) &&
+      hasNativeMethod && canGetDescriptor &&
       docSelfOrAncestor && docSelfOrAncestor !== Object.prototype &&
       doc && doc !== Object.prototype
     ) {
@@ -65,9 +58,6 @@ var nativeCurrentScriptFn = (function(doc) {
         if (des && typeof des.get === "function") {
           cs = des.get;
         }
-      }
-      if (!cs && canLookupGetter) {
-        cs = docSelfOrAncestor.__lookupGetter__("currentScript") || undefined;
       }
       if (!cs) {
         cs = _getCurrentScriptDef(_getProto(docSelfOrAncestor), doc);
@@ -123,6 +113,8 @@ function _currentEvaluatingScript() {
   // Any other attempts cannot be guaranteed and, as such, should be left out
   // from this "Strict Mode" behavior.
   // Alas, returning `null` here is not necessarily accurate either.
+  // We could return `undefined` instead but that would not comply with the spec
+  // in cases where it should correctly be returning `null`.
   return null;
 }
 
