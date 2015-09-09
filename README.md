@@ -7,7 +7,7 @@ Polyfill of HTML5's [`document.currentScript`](http://www.whatwg.org/specs/web-a
 
 ## Public Service Announcement (PSA)
 
-This polyfill will not work in IE11 because of a critical design choice made Microsoft ("Don't Call Me IE!") [\[1\]](https://msdn.microsoft.com/en-us/library/ie/bg182625.aspx)[\[2\]](https://msdn.microsoft.com/en-us/library/ie/dn384059.aspx)[\[3\]](http://www.nczonline.net/blog/2013/07/02/internet-explorer-11-dont-call-me-ie/)[\[4\]](http://blog.getify.com/ie11-please-bring-real-script-preloading-back/) in order to avoid consumers receiving an unnecessarily downgraded experience on websites that were making logic branch and feature decisions based on browser detection rather than feature detection. If you want to help ensure that IE12+ (and/or the Microsoft "Spartan" browser) adds native `document.currentScript` support, please upvote [this issue on the IE Platform Suggestion Forum](https://wpdev.uservoice.com/forums/257854-internet-explorer-platform/suggestions/6965085-support-document-currentscript-property)!
+This polyfill will not work in IE11 because of a critical design choice made Microsoft ("Don't Call Me IE!") [\[1\]](https://msdn.microsoft.com/en-us/library/ie/bg182625.aspx)[\[2\]](https://msdn.microsoft.com/en-us/library/ie/dn384059.aspx)[\[3\]](http://www.nczonline.net/blog/2013/07/02/internet-explorer-11-dont-call-me-ie/)[\[4\]](http://blog.getify.com/ie11-please-bring-real-script-preloading-back/) in order to avoid consumers receiving an unnecessarily downgraded experience on websites that were making logic branch and feature decisions based on browser detection rather than feature detection. Microsoft Edge ("Spartan"/IE12) natively supports `document.currentScript`.
 
 
 ## Overview
@@ -34,7 +34,7 @@ If you are interested in getting the currently _executing_ script [regardless of
 | IE      |        9 |  :+1:  |                                       |
 | IE      |       10 |  :+1:  |                                       |
 | IE      |       11 |  :-1:  | IE removed `script.readyState` but didn't add `document.currentScript` yet! :astonished: |
-| *       |        * | :question: | Only if the browser natively supports `document.currentScript`. |
+| IE      |  Edge/12 |  :+1:  | Natively supports `document.currentScript`. |
 
 ## Usage
 
