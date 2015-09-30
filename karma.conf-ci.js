@@ -90,6 +90,8 @@ module.exports = function(config, gruntConfigOverride) {
 
       recordScreenshots: true,
 
+      recordVideo: true,
+
       "public": "public"
 
     },
