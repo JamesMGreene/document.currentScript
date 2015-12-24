@@ -26,7 +26,7 @@ var canDefineProp = typeof Object.defineProperty === "function" &&
 document._currentScript = _currentEvaluatingScript;
 
 // Polyfill it!
-if (needsPolyfill && canDefineProp) {
+if (needsPolyfill && canDefineProp && typeof canPolyfill !== "undefined" && canPolyfill) {
   Object.defineProperty(document, "currentScript", {
     get: _currentEvaluatingScript
   });

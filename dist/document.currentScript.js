@@ -4,7 +4,7 @@
  * Copyright (c) 2015 James M. Greene
  * Licensed MIT
  * https://github.com/JamesMGreene/document.currentScript
- * v1.0.6
+ * v1.0.7
  */
 (function() {
 
@@ -17,6 +17,11 @@ var supportsScriptReadyState = "readyState" in (scripts[0] || document.createEle
 
 // Lousy browser detection for [not] Opera
 var isNotOpera = !window.opera || window.opera.toString() !== "[object Opera]";
+
+// Guaranteed accurate in IE 6-10.
+// Not supported in any other browsers. =(
+var canPolyfill = supportsScriptReadyState && isNotOpera;
+
 
 // Attempt to retrieve the native `document.currentScript` accessor method
 var nativeCurrentScriptFn = (function(doc) {
@@ -105,7 +110,7 @@ function _currentEvaluatingScript() {
 
   // Guaranteed accurate in IE 6-10.
   // Not supported in any other browsers. =(
-  if (supportsScriptReadyState && isNotOpera) {
+  if (canPolyfill) {
     for (var i = scripts.length; i--; ) {
       if (scripts[i].readyState === "interactive") {
         return scripts[i];
@@ -161,7 +166,7 @@ var canDefineProp = typeof Object.defineProperty === "function" &&
 document._currentScript = _currentEvaluatingScript;
 
 // Polyfill it!
-if (needsPolyfill && canDefineProp) {
+if (needsPolyfill && canDefineProp && typeof canPolyfill !== "undefined" && canPolyfill) {
   Object.defineProperty(document, "currentScript", {
     get: _currentEvaluatingScript
   });

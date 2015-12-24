@@ -1,10 +1,10 @@
-/*global QUnit, _currentEvaluatingScript */
+/*global QUnit, canPolyfill, _currentEvaluatingScript */
 /*jshint maxstatements:false */
 
 (function(module, test, skip) {
   "use strict";
 
-  var hasNativeSupport = "currentScript" in document;
+  var hasNativeSupport = "currentScript" in document && canPolyfill;
 
   // Synchronous execution required here outside of the test callback context
   var polyfillResultSync;
@@ -26,9 +26,17 @@
   }
 
 
+  module("`_currentEvaluatingScript`");
+
+  test("Is defined", function(assert) {
+    assert.expect(1);
+    assert.strictEqual(typeof _currentEvaluatingScript, "function", "Should be an exposed function");
+  });
+
+
   module("`_currentEvaluatingScript()` follows the spec");
 
-  test("When invoked during a script's synchronous evaluation", function(assert) {
+  (canPolyfill ? test : skip)("When invoked during a script's synchronous evaluation", function(assert) {
     assert.expect(4);
 
     var polyfillResultIsNonNullObject = polyfillResultSync != null && typeof polyfillResultSync === "object";
@@ -43,7 +51,7 @@
     assert.strictEqual(polyfillResultSrcSuffix, "/tests.js", "`_currentEvaluatingScript().src` should return the test script's path");
   });
 
-  test("When invoked outside of a script's synchronous evaluation (so, asynchronously)", function(assert) {
+  (canPolyfill ? test : skip)("When invoked outside of a script's synchronous evaluation (so, asynchronously)", function(assert) {
     assert.expect(1);
 
     // While QUnit currently invokes these test callback functions asynchronously,
