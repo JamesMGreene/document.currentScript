@@ -30,16 +30,16 @@ If you are interested in getting the currently _executing_ script [regardless of
 
 ## Browser Compatibility
 
-| Browser | Version  | Works? | Notes                                 |
-|---------|---------:|:------:|---------------------------------------|
-| IE      |        6 |  :+1:  | Must use `document._currentScript()`. |
-| IE      |        7 |  :+1:  | Must use `document._currentScript()`. |
-| IE      |        8 |  :+1:  | Must use `document._currentScript()`. |
-| IE      |        9 |  :+1:  |                                       |
-| IE      |       10 |  :+1:  |                                       |
-| IE      |       11 |  :-1:  | IE removed `script.readyState` but didn't add `document.currentScript` yet! :astonished: See [PSA](#public-service-announcement-psa) for more info. |
-| Edge    |        * |  :+1:  | Natively supports `document.currentScript`. |
-| *       |        * | :question: | Only if the browser natively supports `document.currentScript`. |
+| Browser |  Version | Works?      | Notes                                 |
+|---------|---------:|:-----------:|---------------------------------------|
+| IE      |        6 | Yes         | Must use `document._currentScript()`. |
+| IE      |        7 | Yes         | Must use `document._currentScript()`. |
+| IE      |        8 | Yes         | Must use `document._currentScript()`. |
+| IE      |        9 | Yes         |                                       |
+| IE      |       10 | Yes         |                                       |
+| IE      |       11 | **No!**     | IE removed `script.readyState` but didn't add `document.currentScript` yet! :astonished: See [PSA](#public-service-announcement-psa) for more info. |
+| Edge    |        * | Yes         | Natively supports `document.currentScript`. |
+| *       |        * | _Maybe...?_ | Only if the browser natively supports `document.currentScript`. |
 
 
 ## Usage
@@ -50,7 +50,7 @@ If you are interested in getting the currently _executing_ script [regardless of
 var scriptEl = document.currentScript;
 ```
 
-### IE 6-8 (and IE 9-10)
+### IE 6-8
 
 ```js
 var scriptEl = document._currentScript();
