@@ -115,6 +115,9 @@ module.exports = function(config, gruntConfigOverride) {
 function getFriendlyBrowser(browserName) {
   browserName = browserName || "";
   if (typeof browserName === "string" && browserName) {
+    if (browserName === "MicrosoftEdge") {
+      browserName = "edge";
+    }
     if (browserName === "internet explorer") {
       browserName = "ie";
     }
