@@ -101,7 +101,7 @@ function _currentEvaluatingScript() {
   // Not supported in any other browsers. =(
   if (canPolyfill) {
     for (var i = scripts.length; i--; ) {
-      if (scripts[i].readyState === "interactive") {
+      if (scripts[i] && scripts[i].readyState === "interactive") {
         return scripts[i];
       }
     }
@@ -112,7 +112,7 @@ function _currentEvaluatingScript() {
     typeof nativeCurrentScriptFn === "function" &&
     _currentEvaluatingScript.doNotDeferToNativeMethod !== true
   ) {
-    return nativeCurrentScriptFn.call(document);
+    return nativeCurrentScriptFn.call(document) || null;
   }
 
   // Any other attempts cannot be guaranteed and, as such, should be left out
