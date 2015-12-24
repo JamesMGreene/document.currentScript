@@ -1,5 +1,5 @@
-/*jshint node:true, maxstatements: false, maxlen: false */
-/*global JSON:false */
+/*jshint node:true, maxstatements:false, maxlen:false */
+/*global JSON */
 
 var fs = require("fs");
 var path = require("path");
@@ -56,19 +56,23 @@ module.exports = function(config, gruntConfigOverride) {
 
 
     // test results reporter to use
-    // possible values: "dots", "progress"
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
+    // built-in possible values: "dots", "progress"
+    // other available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ["dots", "saucelabs"],
 
 
     // web server port
     port: 9876,
 
+
+    // enable / disable colors in the output (reporters and logs)
     colors: true,
+
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
+
 
     sauceLabs: {
 
