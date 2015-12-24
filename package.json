@@ -16,6 +16,7 @@
   ],
   "main": "./dist/document.currentScript.js",
   "homepage": "https://github.com/JamesMGreene/document.currentScript",
+  "license": "MIT",
   "licenses": [
     {
       "type": "MIT",
