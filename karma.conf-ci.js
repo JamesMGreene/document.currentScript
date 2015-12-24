@@ -106,7 +106,12 @@ module.exports = function(config, gruntConfigOverride) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: Object.keys(customLaunchers),
-    singleRun: true
+    singleRun: true,
+
+    // Concurrency level
+    // how many browser should be started simultanous
+    concurrency: 3  // SauceLabs open-source limitation
+
   });
 };
 
