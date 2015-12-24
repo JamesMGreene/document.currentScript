@@ -100,17 +100,23 @@ module.exports = function(config, gruntConfigOverride) {
 
     },
 
-    captureTimeout: 120000,
+    // To avoid DISCONNECTED messages when connecting to SauceLabs
+    // This seems to be especially important for old VMs like IE6 and IE7
+    browserDisconnectTimeout: 10000,      // default 2000
+    browserDisconnectTolerance: 2,        // default 0
+    browserNoActivityTimeout: 4 * 60000,  // default 10000
+    captureTimeout: 4 * 60000,            // default 60000
+
+    // Concurrency level
+    // how many browser should be started simultanous
+    concurrency: 3,  // SauceLabs open-source limitation
+
     customLaunchers: customLaunchers,
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: Object.keys(customLaunchers),
-    singleRun: true,
-
-    // Concurrency level
-    // how many browser should be started simultanous
-    concurrency: 3  // SauceLabs open-source limitation
+    singleRun: true
 
   });
 };
