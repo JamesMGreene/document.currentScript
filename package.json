@@ -1,7 +1,7 @@
 {
   "name": "currentscript",
   "title": "document.currentScript",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Polyfill for `document.currentScript`.",
   "keywords": [
     "browser",
@@ -52,7 +52,9 @@
     "karma-safari-launcher": "^0.1.1",
     "karma-sauce-launcher": "^0.3.0",
     "karma-spec-reporter": "0.0.23",
+    "local-version": "^0.2.2",
     "phantomjs": "^1.9.19",
-    "qunitjs": "^1.20.0"
+    "qunitjs": "^1.20.0",
+    "semver": "^5.1.0"
   }
 }

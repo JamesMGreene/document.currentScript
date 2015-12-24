@@ -107,7 +107,7 @@ module.exports = function(config, gruntConfigOverride) {
     browserNoActivityTimeout: 4 * 60000,  // default 10000
     captureTimeout: 4 * 60000,            // default 60000
 
-    // Concurrency level
+    // Concurrency level (added in `karma@0.13.12`)
     // how many browser should be started simultanous
     concurrency: 3,  // SauceLabs open-source limitation
 
