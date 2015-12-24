@@ -58,7 +58,7 @@ module.exports = function(config, gruntConfigOverride) {
     // test results reporter to use
     // built-in possible values: "dots", "progress"
     // other available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ["dots", "saucelabs"],
+    reporters: ["spec", "saucelabs"],
 
 
     // web server port
@@ -71,7 +71,7 @@ module.exports = function(config, gruntConfigOverride) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_DEBUG,
+    logLevel: config.LOG_INFO,
 
 
     sauceLabs: {
