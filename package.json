@@ -1,7 +1,7 @@
 {
   "name": "currentscript",
   "title": "document.currentScript",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Polyfill for `document.currentScript`.",
   "keywords": [
     "browser",
