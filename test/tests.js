@@ -66,6 +66,28 @@
     assert.strictEqual(polyfillResultHasSrcAttr, true, "`_currentEvaluatingScript()` should return a `script` node with a `src` attribute");
   });
 
+  (canPolyfill ? test : skip)("3.1 - When invoked during a script's synchronous evaluation", function(assert) {
+    assert.expect(3);
+
+    var polyfillResultIsNonNullObject = polyfillResultSync != null && typeof polyfillResultSync === "object";
+    var polyfillResultNodeName = polyfillResultIsNonNullObject ? polyfillResultSync.nodeName : undefined;
+
+    assert.strictEqual(polyfillResultIsNonNullObject, true, "`_currentEvaluatingScript()` should return a non-`null` object");
+    assert.strictEqual(polyfillResultNodeName, "SCRIPT", "`_currentEvaluatingScript()` should return a `script` node");
+    assert.strictEqual(polyfillResultSync.outerHTML, "<script></script>", "`_currentEvaluatingScript()` should return a `script` node with some outer HTML");
+  });
+
+  (canPolyfill ? test : skip)("3.2 - When invoked during a script's synchronous evaluation", function(assert) {
+    assert.expect(3);
+
+    var polyfillResultIsNonNullObject = polyfillResultSync != null && typeof polyfillResultSync === "object";
+    var polyfillResultNodeName = polyfillResultIsNonNullObject ? polyfillResultSync.nodeName : undefined;
+
+    assert.strictEqual(polyfillResultIsNonNullObject, true, "`_currentEvaluatingScript()` should return a non-`null` object");
+    assert.strictEqual(polyfillResultNodeName, "SCRIPT", "`_currentEvaluatingScript()` should return a `script` node");
+    assert.strictEqual(polyfillResultSync.text, "Script inner text", "`_currentEvaluatingScript()` should return a `script` node with some inner text");
+  });
+
   (canPolyfill ? test : skip)("4 - When invoked during a script's synchronous evaluation", function(assert) {
     assert.expect(4);
 
