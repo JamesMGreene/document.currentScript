@@ -71,7 +71,7 @@ module.exports = function(config, gruntConfigOverride) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
 
 
     sauceLabs: {
@@ -189,12 +189,12 @@ function generateCustomLaunchers() {
       "6.0":  ["Windows XP"]
     },
     "firefox": {
-      "dev":  ["Windows 7"], //, "OS X 10.10", "Linux"],
+      //"dev":  ["Windows 7"], //, "OS X 10.10", "Linux"],
       //"beta": ["Windows 7", "OS X 10.10", "Linux"],
       //"":     ["Windows 7", "OS X 10.10", "Linux"]
     },
     "chrome": {
-      "dev":  ["Windows 7"], //, "OS X 10.10", "Linux"],
+      //"dev":  ["Windows 7"], //, "OS X 10.10", "Linux"],
       //"beta": ["Windows 7", "OS X 10.10", "Linux"],
       //"":     ["Windows 7", "OS X 10.10", "Linux"]
     },
