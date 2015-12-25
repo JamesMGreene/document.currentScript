@@ -178,47 +178,47 @@ function prefixTag(tagValue, tagPrefix) {
 function generateCustomLaunchers() {
   var browsers = {
     "MicrosoftEdge": {
-      "20.10240": ["Windows 10"]
+      //"20.10240": ["Windows 10"]
     },
     "internet explorer": {
-      "11.0": ["Windows 8.1"],
-      "10.0": ["Windows 8"],
-      "9.0":  ["Windows 7"],
-      "8.0":  ["Windows 7"],
+      //"11.0": ["Windows 8.1"],
+      //"10.0": ["Windows 8"],
+      //"9.0":  ["Windows 7"],
+      //"8.0":  ["Windows 7"],
       "7.0":  ["Windows XP"],
       "6.0":  ["Windows XP"]
     },
     "firefox": {
-      "dev":  ["Windows 7", "OS X 10.10", "Linux"],
-      "beta": ["Windows 7", "OS X 10.10", "Linux"],
-      "":     ["Windows 7", "OS X 10.10", "Linux"]
+      "dev":  ["Windows 7"], //, "OS X 10.10", "Linux"],
+      //"beta": ["Windows 7", "OS X 10.10", "Linux"],
+      //"":     ["Windows 7", "OS X 10.10", "Linux"]
     },
     "chrome": {
-      "dev":  ["Windows 7", "OS X 10.10", "Linux"],
-      "beta": ["Windows 7", "OS X 10.10", "Linux"],
-      "":     ["Windows 7", "OS X 10.10", "Linux"]
+      "dev":  ["Windows 7"], //, "OS X 10.10", "Linux"],
+      //"beta": ["Windows 7", "OS X 10.10", "Linux"],
+      //"":     ["Windows 7", "OS X 10.10", "Linux"]
     },
     "safari": {
-      "9.0": ["OS X 10.11"],
-      "8.0": ["OS X 10.10"],
-      "7.0": ["OS X 10.9"],
-      "6.0": ["OS X 10.8"],
-      "5.1": ["Windows 7"]
+      //"9.0": ["OS X 10.11"],
+      //"8.0": ["OS X 10.10"],
+      //"7.0": ["OS X 10.9"],
+      //"6.0": ["OS X 10.8"],
+      //"5.1": ["Windows 7"]
     },
     "opera": {
-      "12.15": ["Linux"],
-      "12.12": ["Windows 7"],
-      "11.64": ["Windows 7"]
+      //"12.15": ["Linux"],
+      //"12.12": ["Windows 7"],
+      //"11.64": ["Windows 7"]
     },
     "android": {
-      "5.1": ["Linux"],
-      "4.4": ["Linux"],
-      "4.0": ["Linux"]
+      //"5.1": ["Linux"],
+      //"4.4": ["Linux"],
+      //"4.0": ["Linux"]
     },
     "iphone": {
-      "9.2": ["OS X 10.10"],
-      "8.4": ["OS X 10.10"],
-      "7.1": ["OS X 10.10"]
+      //"9.2": ["OS X 10.10"],
+      //"8.4": ["OS X 10.10"],
+      //"7.1": ["OS X 10.10"]
     }
   };
 
