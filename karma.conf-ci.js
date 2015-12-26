@@ -185,8 +185,8 @@ function generateCustomLaunchers() {
       "10.0": ["Windows 8"],
       "9.0":  ["Windows 7"],
       "8.0":  ["Windows 7"],
-      "7.0":  ["Windows XP"]
-      //, "6.0":  ["Windows XP"]   // IE6 always fails to connect and times out
+      "7.0":  ["Windows XP"],
+      "6.0":  ["Windows XP"]   // IE6 tends to timeout and fail to connect
     },
     "firefox": {
       "dev":  ["Windows 7", "OS X 10.10", "Linux"],
