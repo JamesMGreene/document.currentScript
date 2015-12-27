@@ -1,5 +1,5 @@
-/*global QUnit, canPolyfill, _currentEvaluatingScript */
 /*jshint maxstatements:false */
+/*global QUnit, canPolyfill, _currentEvaluatingScript */
 
 (function(module, test, skip) {
   "use strict";
