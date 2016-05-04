@@ -42,6 +42,19 @@ If you are interested in getting the currently _executing_ script [regardless of
 | *       |        * | _Maybe...?_ | Only if the browser natively supports `document.currentScript`. |
 
 
+## Installation
+
+### NPM
+
+```shell
+npm install currentscript
+```
+
+### GitHub
+
+Alternatively, you can download/clone its GitHub repo: [JamesMGreene/document.currentScript](https://github.com/JamesMGreene/document.currentScript)
+
+
 ## Usage
 
 ### IE 9-10
