@@ -25,7 +25,7 @@ In other words, if code is being operated on _after_ its **initial** evaluation 
 
 ### Loose
 
-If you are interested in getting the currently _executing_ script [regardless of the source/trigger of the exection], take a look at [JamesMGreene/currentExecutingScript](https://github.com/JamesMGreene/currentExecutingScript) instead.
+If you are interested in getting the currently _executing_ script [regardless of the source/trigger of the execution], take a look at [JamesMGreene/currentExecutingScript](https://github.com/JamesMGreene/currentExecutingScript) instead.
 
 
 ## Browser Compatibility
@@ -37,7 +37,7 @@ If you are interested in getting the currently _executing_ script [regardless of
 | IE      |        8 | Yes         |                                       |
 | IE      |        9 | Yes         |                                       |
 | IE      |       10 | Yes         |                                       |
-| IE      |       11 | **No!**     | IE removed `script.readyState` but didn't add `document.currentScript` yet! :astonished: See [PSA](#public-service-announcement-psa) for more info. |
+| IE      |       11 | **NO!**     | IE removed `script.readyState` but didn't add `document.currentScript` yet! :astonished: See [PSA](#public-service-announcement-psa) for more info. |
 | Edge    |        * | Yes         | Already [natively supports `document.currentScript`][]. |
 | *       |        * | _Maybe...?_ | Only if the browser [natively supports `document.currentScript`][]. |
 
