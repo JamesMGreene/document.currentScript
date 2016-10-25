@@ -1,7 +1,7 @@
 /*!
  * document.currentScript
  * Polyfill for `document.currentScript`.
- * Copyright (c) 2015 James M. Greene
+ * Copyright (c) 2016 James M. Greene
  * Licensed MIT
  * https://github.com/JamesMGreene/document.currentScript
  * v1.1.0

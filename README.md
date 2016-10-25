@@ -3,7 +3,7 @@
 
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/JamesMGreene_dcs.svg)](https://saucelabs.com/u/JamesMGreene_dcs)
 
-Polyfill of HTML5's [`document.currentScript`](http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html#dom-document-currentscript) for IE 6-10 _**ONLY**_.
+A polyfill of HTML5's [`document.currentScript`](http://www.whatwg.org/specs/web-apps/current-work/multipage/dom.html#dom-document-currentscript) for IE 6-10 _**ONLY**_.
 
 
 ## Public Service Announcement (PSA)
@@ -34,7 +34,7 @@ If you are interested in getting the currently _executing_ script [regardless of
 |---------|---------:|:-----------:|---------------------------------------|
 | IE      |        6 | Yes         | Must use `document._currentScript()`. |
 | IE      |        7 | Yes         | Must use `document._currentScript()`. |
-| IE      |        8 | Yes         | Must use `document._currentScript()`. |
+| IE      |        8 | Yes         |                                       |
 | IE      |        9 | Yes         |                                       |
 | IE      |       10 | Yes         |                                       |
 | IE      |       11 | **No!**     | IE removed `script.readyState` but didn't add `document.currentScript` yet! :astonished: See [PSA](#public-service-announcement-psa) for more info. |
@@ -57,13 +57,13 @@ Alternatively, you can download/clone its GitHub repo: [JamesMGreene/document.cu
 
 ## Usage
 
-### IE 9-10
+### IE 8-10
 
 ```js
 var scriptEl = document.currentScript;
 ```
 
-### IE 6-8
+### IE 6-7
 
 ```js
 var scriptEl = document._currentScript();
