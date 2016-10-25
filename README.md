@@ -38,8 +38,8 @@ If you are interested in getting the currently _executing_ script [regardless of
 | IE      |        9 | Yes         |                                       |
 | IE      |       10 | Yes         |                                       |
 | IE      |       11 | **No!**     | IE removed `script.readyState` but didn't add `document.currentScript` yet! :astonished: See [PSA](#public-service-announcement-psa) for more info. |
-| Edge    |        * | Yes         | Natively supports `document.currentScript`. |
-| *       |        * | _Maybe...?_ | Only if the browser natively supports `document.currentScript`. |
+| Edge    |        * | Yes         | Already [natively supports `document.currentScript`][]. |
+| *       |        * | _Maybe...?_ | Only if the browser [natively supports `document.currentScript`][]. |
 
 
 ## Installation
@@ -92,3 +92,7 @@ document._currentScript.doNotDeferToNativeMethod = true;
 
 - Demo using old Gist: http://jsfiddle.net/JamesMGreene/9DFc9/
 - Original location, old Gist: https://gist.github.com/JamesMGreene/fb4a71e060da6e26511d
+
+
+
+[natively supports `document.currentScript`]: https://developer.mozilla.org/en-US/docs/Web/API/Document/currentScript#Browser_compatibility
