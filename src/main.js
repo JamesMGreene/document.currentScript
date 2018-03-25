@@ -7,9 +7,12 @@ var supportsScriptReadyState = "readyState" in (scripts[0] || document.createEle
 // Lousy browser detection for [not] Opera
 var isNotOpera = !window.opera || window.opera.toString() !== "[object Opera]";
 
-// Guaranteed accurate in IE 6-10.
+// Detect IE "Don't call me IE" 11 (sourced from https://stackoverflow.com/a/19868056/5223757)
+var isIE11 = (!(window.ActiveXObject) && "ActiveXObject" in window)
+
+// Guaranteed accurate in IE 6-11.
 // Not supported in any other browsers. =(
-var canPolyfill = supportsScriptReadyState && isNotOpera;
+var canPolyfill = (supportsScriptReadyState && isNotOpera) || isIE11;
 
 
 // Attempt to retrieve the native `document.currentScript` accessor method
